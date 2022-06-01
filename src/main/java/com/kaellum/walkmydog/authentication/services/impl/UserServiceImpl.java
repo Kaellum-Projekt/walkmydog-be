@@ -74,9 +74,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 User user = userRepository.findByUsername(username);
                 String access_token = JWT.create()
                         .withSubject(user.getUsername())
-                        .withExpiresAt(new Date(System.currentTimeMillis() + 1 * 60 * 1000))
+                        .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 1000))
                         .withIssuer(request.getRequestURL().toString())
-                        .withClaim("roles", user.getRole())
+                        .withArrayClaim("roles", new String[]{user.getRole()})
                         .sign(algorithm);
                 Map<String, String> tokens = new HashMap<>();
                 tokens.put("access_token", access_token);
