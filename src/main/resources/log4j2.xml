@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="60">
+
+    <Appenders>
+        <Console name="Console-Appender" target="SYSTEM_OUT">
+            <PatternLayout>
+                <pattern>
+                    [%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%l] [%t] %c{1} - %msg%n
+                </pattern>>
+            </PatternLayout>
+        </Console>
+        <RollingFile name="File-Appender" fileName="logs/walkmydog.log"
+                     filePattern="logs/walkmydog-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout>
+                <pattern>
+                    [%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%l] [%t] %c{1} - %msg%n
+                </pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="5 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>     
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.springframework" level="info">
+            <AppenderRef ref="File-Appender" />
+            <!--<AppenderRef ref="Console-Appender"/>-->
+        </Logger>
+        <Logger name="com.kaellum.walkmydog" level="debug">
+            <AppenderRef ref="File-Appender" />
+            <!--<AppenderRef ref="Console-Appender"/>-->
+        </Logger>
+        <Root level="info">
+            <AppenderRef ref="Console-Appender"/>
+            <!--<AppenderRef ref="File-Appender" />-->
+        </Root>
+    </Loggers>
+</Configuration>
