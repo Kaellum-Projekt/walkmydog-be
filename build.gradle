@@ -25,6 +25,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-log4j2'
 	implementation 'org.modelmapper:modelmapper:2.4.4'
 	implementation group: 'com.auth0', name: 'java-jwt', version: '3.18.3'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	compileOnly 'org.projectlombok:lombok'

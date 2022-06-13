@@ -13,5 +13,6 @@ public class AddressDto{
 	private String address;
 	private String city;
 	private String province;
+	private String country;
 	private String zipCode;
 }

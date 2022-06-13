@@ -10,6 +10,7 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.kaellum.walkmydog.exception.WalkMyDogException;
@@ -48,7 +49,7 @@ public class WalkerServiceImpl implements WalkerService{
 	}
 
 	@Override
-	public List<WalkerDto> getAllWalkers() {
+	public List<WalkerDto> getAllWalkers(Pageable page) {
 		List<WalkerDto> resp = null;
 		try {
 			List<Walker> entities = walkerRepository.findAll();

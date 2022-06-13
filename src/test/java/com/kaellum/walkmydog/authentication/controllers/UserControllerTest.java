@@ -23,8 +23,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kaellum.walkmydog.authentication.collections.User;
-import com.kaellum.walkmydog.authentication.services.UserService;
+import com.kaellum.walkmydog.user.collections.User;
+import com.kaellum.walkmydog.user.controllers.UserController;
+import com.kaellum.walkmydog.user.services.UserService;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(UserController.class)

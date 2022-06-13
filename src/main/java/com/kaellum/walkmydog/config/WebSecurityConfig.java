@@ -40,14 +40,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
     protected void configure(HttpSecurity http) throws Exception 
     {
         CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean());
-        customAuthenticationFilter.setFilterProcessesUrl("/api/user/login");
+        customAuthenticationFilter.setFilterProcessesUrl("/api/auth/login");
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(STATELESS);
-        http.authorizeRequests().antMatchers("/api/user/login/**","/api/user/**").permitAll();
-        http.authorizeRequests().antMatchers(GET, "/api/walker/**").hasAnyAuthority("ROLE_USER");
-        http.authorizeRequests().antMatchers(POST, "/api/walker/**").hasAnyAuthority("ROLE_USER");
-        http.authorizeRequests().antMatchers(PUT, "/api/walker/**").hasAnyAuthority("ROLE_USER");
-        http.authorizeRequests().antMatchers(DELETE, "/api/walker/**").hasAnyAuthority("ROLE_USER");
+        http.authorizeRequests().antMatchers("/api/auth/**","/api/user/add").permitAll();
+        http.authorizeRequests().antMatchers(GET, "/api/walker/**","/api/user/**").hasAnyAuthority("ROLE_USER");
+        http.authorizeRequests().antMatchers(POST, "/api/walker/**","/api/user/**").hasAnyAuthority("ROLE_USER");
+        http.authorizeRequests().antMatchers(PUT, "/api/walker/**","/api/user/**").hasAnyAuthority("ROLE_USER");
+        http.authorizeRequests().antMatchers(DELETE, "/api/walker/**","/api/user/**").hasAnyAuthority("ROLE_USER");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(customAuthenticationFilter);
         http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);

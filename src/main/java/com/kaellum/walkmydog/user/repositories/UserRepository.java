@@ -1,9 +1,9 @@
-package com.kaellum.walkmydog.authentication.repositories;
+package com.kaellum.walkmydog.user.repositories;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import com.kaellum.walkmydog.authentication.collections.User;
+import com.kaellum.walkmydog.user.collections.User;
 
 @Repository
 public interface UserRepository extends MongoRepository<User, String>{
