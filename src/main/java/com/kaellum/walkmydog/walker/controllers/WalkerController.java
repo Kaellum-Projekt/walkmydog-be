@@ -28,7 +28,7 @@ public class WalkerController {
 	
 	private final WalkerService walkerService;
 	
-	@GetMapping("/")
+	@GetMapping("/all")
 	@ResponseStatus(HttpStatus.OK)
 	public List<WalkerDto> getAllWalkers (@PageableDefault Pageable pageable){
 		return walkerService.getAllWalkers(pageable);
@@ -39,13 +39,6 @@ public class WalkerController {
 	public WalkerDto getWalkerById (@RequestParam String id) throws WalkMyDogException {
 		return walkerService.getWalkerById(id);
 	}
-	
-	@PostMapping("/add")
-	@ResponseStatus(HttpStatus.CREATED)
-	public WalkerDto addWalker (@RequestBody WalkerDto dto){		
-		return walkerService.addWalker(dto);		
-	}
-	
 	
 	@PutMapping("/alter")
 	@ResponseStatus(HttpStatus.OK)

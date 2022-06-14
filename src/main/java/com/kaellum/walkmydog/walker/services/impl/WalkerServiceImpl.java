@@ -10,6 +10,7 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -52,9 +53,9 @@ public class WalkerServiceImpl implements WalkerService{
 	public List<WalkerDto> getAllWalkers(Pageable page) {
 		List<WalkerDto> resp = null;
 		try {
-			List<Walker> entities = walkerRepository.findAll();
+			Page<Walker> entities = walkerRepository.findAll(page);
 			
-			resp = modelMapper.map(entities, new TypeToken<List<WalkerDto>>() {}.getType());
+			resp = modelMapper.map(entities.getContent(), new TypeToken<List<WalkerDto>>() {}.getType());
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw WalkMyDogException.buildCriticalRuntime(READ_API, e);

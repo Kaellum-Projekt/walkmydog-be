@@ -32,15 +32,9 @@ public class UserServiceImpl implements UserService {
 			UserDto userDto = user.getUserDto();
 			WalkerDto walkerDto = user.getWalkerDto();
 			
-			if(userDto == null && walkerDto == null) {
+			if(userDto == null || walkerDto == null) {
 				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
-						"User object and Walker object should not be null");
-			}else if(userDto == null){
-				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
-						"User object should not be null");			
-			}else if(walkerDto == null){
-				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
-						"Walker object should not be null");			
+						"User and Walker object must be provided");
 			}
 			
 			User userDoc = modelMapper.map(userDto, User.class);
