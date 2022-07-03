@@ -1,20 +1,18 @@
-package com.kaellum.walkmydog.walker.collections;
+package com.kaellum.walkmydog.provider.dtos;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Document
 @Data
 @NoArgsConstructor
-public class Address{
+@AllArgsConstructor
+public class AddressDto{
 	
-	@Id
 	private String id;
 	private String address;
 	private String city;
 	private String province;
+	private String country;
 	private String zipCode;
 }

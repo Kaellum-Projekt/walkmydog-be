@@ -1,11 +1,11 @@
-package com.kaellum.walkmydog.walker.mappers;
+package com.kaellum.walkmydog.provider.mappers;
 
 import org.modelmapper.PropertyMap;
 
-import com.kaellum.walkmydog.walker.collections.Walker;
-import com.kaellum.walkmydog.walker.dtos.WalkerDto;
+import com.kaellum.walkmydog.provider.collections.Provider;
+import com.kaellum.walkmydog.provider.dtos.ProviderDto;
 
-public class WalkerDtoToWalker extends PropertyMap<WalkerDto, Walker>{
+public class ProviderDtoToProvider extends PropertyMap<ProviderDto, Provider>{
 
 	@Override
 	protected void configure() {

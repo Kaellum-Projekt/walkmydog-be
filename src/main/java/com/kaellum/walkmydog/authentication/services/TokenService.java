@@ -7,4 +7,6 @@ import javax.servlet.http.HttpServletResponse;
 
 public interface TokenService {
 	void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
+	
+	String getToken();
 }

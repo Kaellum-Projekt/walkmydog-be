@@ -7,7 +7,7 @@ import org.modelmapper.convention.NamingConventions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.kaellum.walkmydog.walker.mappers.WalkerDtoToWalker;
+import com.kaellum.walkmydog.provider.mappers.ProviderDtoToProvider;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -33,7 +33,7 @@ public class ModelMapperConfig {
 				
 		log.info("==> modelMapper :{}", modelMapper);
 		
-		modelMapper.addMappings(new WalkerDtoToWalker());
+		modelMapper.addMappings(new ProviderDtoToProvider());
 		
 		return modelMapper;		
 	}

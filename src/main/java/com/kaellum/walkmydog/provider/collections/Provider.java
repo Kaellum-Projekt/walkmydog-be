@@ -1,4 +1,4 @@
-package com.kaellum.walkmydog.walker.collections;
+package com.kaellum.walkmydog.provider.collections;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -6,9 +6,9 @@ import java.util.Set;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.kaellum.walkmydog.walker.dtos.AddressDto;
-import com.kaellum.walkmydog.walker.dtos.enums.TimeRange;
-import com.kaellum.walkmydog.walker.dtos.enums.WeekDays;
+import com.kaellum.walkmydog.provider.dtos.AddressDto;
+import com.kaellum.walkmydog.provider.dtos.enums.TimeRange;
+import com.kaellum.walkmydog.provider.dtos.enums.WeekDays;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class Walker extends Audit{
+public class Provider extends Audit{
 	
 	@Id
 	private String id;
@@ -31,6 +31,7 @@ public class Walker extends Audit{
 	private Set<WeekDays> weekDays;
 	private Set<TimeRange> timeRange;
 	private Set<AddressDto> addresses;
+	private String userId;
 
 	
 	

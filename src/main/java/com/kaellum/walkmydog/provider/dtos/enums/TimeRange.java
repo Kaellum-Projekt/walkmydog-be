@@ -1,4 +1,4 @@
-package com.kaellum.walkmydog.walker.dtos.enums;
+package com.kaellum.walkmydog.provider.dtos.enums;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;

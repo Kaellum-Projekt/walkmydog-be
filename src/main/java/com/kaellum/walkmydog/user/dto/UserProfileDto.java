@@ -1,6 +1,6 @@
 package com.kaellum.walkmydog.user.dto;
 
-import com.kaellum.walkmydog.walker.dtos.WalkerDto;
+import com.kaellum.walkmydog.provider.dtos.ProviderDto;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +10,6 @@ import lombok.RequiredArgsConstructor;
 public class UserProfileDto {
 	
 	private final UserDto userDto;
-	private final WalkerDto walkerDto;
+	private final ProviderDto providerDto;
 
 }

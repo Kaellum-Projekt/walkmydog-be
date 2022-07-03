@@ -1,4 +1,4 @@
-package com.kaellum.walkmydog.walker.dtos;
+package com.kaellum.walkmydog.provider.dtos;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -6,11 +6,8 @@ import java.util.Set;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
-//import javax.validation.constraints.Email;
-//import javax.validation.constraints.NotNull;
-
-import com.kaellum.walkmydog.walker.dtos.enums.TimeRange;
-import com.kaellum.walkmydog.walker.dtos.enums.WeekDays;
+import com.kaellum.walkmydog.provider.dtos.enums.TimeRange;
+import com.kaellum.walkmydog.provider.dtos.enums.WeekDays;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class WalkerDto {
+public class ProviderDto {
 	
 	private String id;
 	@NotNull
@@ -37,5 +34,6 @@ public class WalkerDto {
 	private Set<TimeRange> timeRange;
 	@NotNull
 	private Set<AddressDto> addresses;
+	private String userId;
 
 }

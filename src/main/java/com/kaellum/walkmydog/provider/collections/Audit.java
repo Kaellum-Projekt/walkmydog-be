@@ -1,4 +1,4 @@
-package com.kaellum.walkmydog.walker.collections;
+package com.kaellum.walkmydog.provider.collections;
 
 import java.time.LocalDateTime;
 

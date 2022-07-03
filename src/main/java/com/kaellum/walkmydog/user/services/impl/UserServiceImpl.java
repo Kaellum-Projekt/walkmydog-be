@@ -5,13 +5,13 @@ import org.springframework.stereotype.Service;
 
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
+import com.kaellum.walkmydog.provider.dtos.ProviderDto;
+import com.kaellum.walkmydog.provider.services.ProviderService;
 import com.kaellum.walkmydog.user.collections.User;
 import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserProfileDto;
 import com.kaellum.walkmydog.user.repositories.UserRepository;
 import com.kaellum.walkmydog.user.services.UserService;
-import com.kaellum.walkmydog.walker.dtos.WalkerDto;
-import com.kaellum.walkmydog.walker.services.WalkerService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -21,7 +21,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final WalkerService walkerService;
+    private final ProviderService providerService;
     //private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
 
@@ -30,16 +30,16 @@ public class UserServiceImpl implements UserService {
 		log.info("New User Dto {}", user);
 		try {
 			UserDto userDto = user.getUserDto();
-			WalkerDto walkerDto = user.getWalkerDto();
+			ProviderDto providerDto = user.getProviderDto();
 			
-			if(userDto == null || walkerDto == null) {
+			if(userDto == null || providerDto == null) {
 				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
-						"User and Walker object must be provided");
+						"User and Provider object must be provided");
 			}
 			
 			User userDoc = modelMapper.map(userDto, User.class);
 			
-			WalkerDto walker = walkerService.addWalker(walkerDto);
+			ProviderDto walker = providerService.addProvider(providerDto);
 			userDoc.setProfileId(walker.getId());
 			userRepository.save(userDoc);		
 			
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
 		log.info("Delete User {}", id);
 		try {
 			User user = userRepository.findById(id).get();
-			walkerService.deleteWalker(user.getProfileId());
+			providerService.deleteProvider(user.getProfileId());
 			userRepository.deleteById(id);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);

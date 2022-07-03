@@ -15,7 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -98,5 +101,14 @@ public class TokenServiceImpl implements TokenService, UserDetailsService {
             return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
         }
     }
-
+    
+    @Override
+    public String getToken() {
+    	String token = null;
+    	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    	if (auth != null)
+    		token = ((UsernamePasswordAuthenticationToken) auth).getPrincipal().toString();
+    
+    	return token;
+    }
 }
