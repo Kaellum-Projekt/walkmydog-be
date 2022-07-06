@@ -1,6 +1,11 @@
 package com.kaellum.walkmydog.user.services.impl;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.kaellum.walkmydog.exception.WalkMyDogException;
@@ -8,7 +13,7 @@ import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
 import com.kaellum.walkmydog.provider.dtos.ProviderDto;
 import com.kaellum.walkmydog.provider.services.ProviderService;
 import com.kaellum.walkmydog.user.collections.User;
-import com.kaellum.walkmydog.user.dto.UserDto;
+import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
 import com.kaellum.walkmydog.user.dto.UserProfileDto;
 import com.kaellum.walkmydog.user.repositories.UserRepository;
 import com.kaellum.walkmydog.user.services.UserService;
@@ -22,27 +27,41 @@ import lombok.extern.log4j.Log4j2;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ProviderService providerService;
-    //private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    
+    public static String USERNAME;
 
 	@Override
-	public Boolean addNewUser(UserProfileDto user) throws WalkMyDogException {
+	public UserProfileDto addNewUser(UserProfileDto user) throws WalkMyDogException {
 		log.info("New User Dto {}", user);
+		UserProfileDto dtoReturn = null;
 		try {
-			UserDto userDto = user.getUserDto();
-			ProviderDto providerDto = user.getProviderDto();
-			
-			if(userDto == null || providerDto == null) {
+			if(user == null)
 				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
-						"User and Provider object must be provided");
-			}
+						"User object must be provided");
+
+			User userDoc = modelMapper.map(user, User.class);
+			String password = passwordEncoder.encode(user.getPassword());
+			userDoc.setPassword(password);
+			USERNAME = user.getEmail();
 			
-			User userDoc = modelMapper.map(userDto, User.class);
+			ProviderDto provider = null;
+			if(user.getRole().equals("ROLE_PROVIDER")) {
+				if(user.getProviderDto() == null)
+					WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
+							"Provider object must be provided");
+				ProviderDto providerDto = user.getProviderDto();
+				providerDto.setEmail(user.getEmail());
+				provider = providerService.addProvider(user.getProviderDto());
+				userDoc.setProviderId(provider.getId());
+			}			
 			
-			ProviderDto walker = providerService.addProvider(providerDto);
-			userDoc.setProfileId(walker.getId());
 			userRepository.save(userDoc);		
 			
+			dtoReturn = modelMapper.map(userDoc, UserProfileDto.class);
+			dtoReturn.setProviderDto(provider);
+			
 		} catch (WalkMyDogException we) {
 			log.error(we.getMessage(), we);
 			throw we;
@@ -50,33 +69,22 @@ public class UserServiceImpl implements UserService {
 			log.error(e.getMessage(), e);
 			WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
 		}
-		return true;
+		return dtoReturn;
 	}
 
 	@Override
-	public Boolean deleteUser(String id) throws WalkMyDogException {
+	public Boolean deactivateUser(String id) throws WalkMyDogException {
 		log.info("Delete User {}", id);
 		try {
-			User user = userRepository.findById(id).get();
-			providerService.deleteProvider(user.getProfileId());
-			userRepository.deleteById(id);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
-		}
-		return true;
-	}
+			Optional<User> userOpt = userRepository.findById(id);
+			
+			if(userOpt.isEmpty()) 
+				WalkMyDogException.buildWarningNotFound(WalkMyDogExApiTypes.UPDATE_API, "User id does not exist");
 
-	@Override
-	public Boolean updateUser(UserDto userProfileDto) throws WalkMyDogException {
-		log.info("New User Dto {}", userProfileDto);
-		try {			
-			if(userProfileDto == null){
-				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
-						"User object should not be null");			
-			}
-			User userDoc = modelMapper.map(userProfileDto, User.class);			
-			userRepository.save(userDoc);				
+			User user = userOpt.get();
+			user.setDeactivationDate(LocalDateTime.now());
+			if(userRepository.save(user) != null)
+				return true;		
 		} catch (WalkMyDogException we) {
 			log.error(we.getMessage(), we);
 			throw we;
@@ -84,6 +92,41 @@ public class UserServiceImpl implements UserService {
 			log.error(e.getMessage(), e);
 			WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
 		}
-		return true;
+		return false;
+	}
+
+	@Override
+	public Boolean passwordUpdate(UserPasswordUpdate userPasswordUpdate, String userId) throws WalkMyDogException {
+		try {
+			if(StringUtils.isBlank(userPasswordUpdate.getCurrentPassword()) ||
+					StringUtils.isBlank(userPasswordUpdate.getNewPassword()) ||
+					StringUtils.isBlank(userId))
+				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, "All three parameters are mandatory");
+			
+			Optional<User> userOpt = userRepository.findById(userId);
+			
+			if(userOpt.isEmpty()) 
+				WalkMyDogException.buildWarningNotFound(WalkMyDogExApiTypes.UPDATE_API, "User id does not exist");
+
+			User user = userOpt.get();
+			
+			//Validates current password
+			String passwordProvided = passwordEncoder.encode(userPasswordUpdate.getCurrentPassword());
+			if(!passwordProvided.equals(user.getPassword()))
+				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, 
+						"Current Password is not Valid.<br>Please, Try it again!");
+			
+			String newPassword = passwordEncoder.encode(userPasswordUpdate.getNewPassword());
+			user.setPassword(newPassword);			
+			if(userRepository.save(user) != null)
+				return true;
+		} catch (WalkMyDogException we) {
+			log.error(we.getMessage(), we);
+			throw we;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
+		}
+		return false;
 	}
 }

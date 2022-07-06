@@ -26,6 +26,8 @@ dependencies {
 	implementation 'org.modelmapper:modelmapper:2.4.4'
 	implementation group: 'com.auth0', name: 'java-jwt', version: '3.18.3'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+	
 	
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	compileOnly 'org.projectlombok:lombok'

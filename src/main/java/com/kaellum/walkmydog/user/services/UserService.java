@@ -2,12 +2,12 @@ package com.kaellum.walkmydog.user.services;
 
 
 import com.kaellum.walkmydog.exception.WalkMyDogException;
-import com.kaellum.walkmydog.user.dto.UserDto;
+import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
 import com.kaellum.walkmydog.user.dto.UserProfileDto;
 
 
 public interface UserService {
-    Boolean addNewUser(UserProfileDto userProfileDto) throws WalkMyDogException;
-    Boolean deleteUser (String id) throws WalkMyDogException;
-	Boolean updateUser(UserDto userProfileDto) throws WalkMyDogException;    
+	UserProfileDto addNewUser(UserProfileDto userProfileDto) throws WalkMyDogException;
+    Boolean passwordUpdate(UserPasswordUpdate userPasswordUpdate, String userId) throws WalkMyDogException;
+    Boolean deactivateUser (String id) throws WalkMyDogException;   
 }

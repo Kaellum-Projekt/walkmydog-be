@@ -25,7 +25,7 @@ public class ProviderDto {
 	private String lastName;
 	@NotNull
 	private LocalDate dob;
-	@Email @NotNull
+	@Email
 	private String email;
 	@NotNull
 	private String phone;
@@ -34,6 +34,4 @@ public class ProviderDto {
 	private Set<TimeRange> timeRange;
 	@NotNull
 	private Set<AddressDto> addresses;
-	private String userId;
-
 }

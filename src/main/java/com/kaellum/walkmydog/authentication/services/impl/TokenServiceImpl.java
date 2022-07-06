@@ -57,9 +57,9 @@ public class TokenServiceImpl implements TokenService, UserDetailsService {
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(refresh_token);
                 String username = decodedJWT.getSubject();
-                User user = userRepository.findByUsername(username);
+                User user = userRepository.findByEmail(username);
                 String access_token = JWT.create()
-                        .withSubject(user.getUsername())
+                        .withSubject(user.getEmail())
                         .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 1000))
                         .withIssuer(request.getRequestURL().toString())
                         .withArrayClaim("roles", new String[]{user.getRole()})
@@ -90,7 +90,7 @@ public class TokenServiceImpl implements TokenService, UserDetailsService {
 	
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByEmail(username);
         if(user == null) {
             log.error("User {} not found in the database", username);
           throw new UsernameNotFoundException("User not found in the database");
@@ -98,15 +98,15 @@ public class TokenServiceImpl implements TokenService, UserDetailsService {
             log.info("User found in the database: {}", username);
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority(user.getRole()));
-            return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
+            return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
         }
     }
     
     @Override
     public String getToken() {
-    	String token = null;
+    	String token = "";
     	Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    	if (auth != null)
+    	if (!auth.getPrincipal().equals("anonymousUser"))
     		token = ((UsernamePasswordAuthenticationToken) auth).getPrincipal().toString();
     
     	return token;

@@ -8,6 +8,6 @@ import com.kaellum.walkmydog.user.collections.User;
 @Repository
 public interface UserRepository extends MongoRepository<User, String>{
 	
-	User findByUsername(String username);
+	User findByEmail(String email);
 
 }

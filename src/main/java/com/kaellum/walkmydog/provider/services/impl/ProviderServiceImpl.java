@@ -40,6 +40,7 @@ public class ProviderServiceImpl implements ProviderService{
 		ProviderDto resp = null;
 		try {
 			Provider entity = modelMapper.map(dto, Provider.class);
+			entity.setCreatedBy(dto.getEmail());
 			
 			resp = modelMapper.map(providerRepository.save(entity), ProviderDto.class);
 		} catch (Exception e) {

@@ -1,6 +1,7 @@
 package com.kaellum.walkmydog.user.controllers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kaellum.walkmydog.user.dto.UserDto;
+import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
 import com.kaellum.walkmydog.user.dto.UserProfileDto;
 import com.kaellum.walkmydog.user.services.UserService;
 
@@ -23,24 +24,25 @@ public class UserController {
 	
 	private final UserService userService;
 	
-	@PostMapping("/add")
+	@PostMapping("/signup")
 	@ResponseStatus(HttpStatus.CREATED)
-	public boolean createNewUser(@RequestBody UserProfileDto userProfile) {
+	public UserProfileDto createNewUser(@RequestBody UserProfileDto userProfile) {
 		return userService.addNewUser(userProfile);	
 	}
 	
-	@DeleteMapping("/del")
+	@PutMapping("/update-password")
 	@ResponseStatus(HttpStatus.OK)
-	public boolean deleteUser(@RequestParam String id) {
-		return userService.deleteUser(id);	
+	@PreAuthorize("@userResolverProvider.isOwner(#userPasswordUpdate)")
+	public boolean passwordUpdate(@RequestBody UserPasswordUpdate userPasswordUpdate, @RequestParam String userId) {
+		return userService.passwordUpdate(userPasswordUpdate, userId);	
 	}
 	
-	@PutMapping("/upd")
+	@DeleteMapping("/deactivate")
 	@ResponseStatus(HttpStatus.OK)
-	public boolean updatewUser(@RequestBody UserDto user) {
-		return userService.updateUser(user);	
+	@PreAuthorize("@userResolverProvider.isOwner(#userPasswordUpdate)")
+	public boolean deactivateUser(@RequestParam String id) {
+		return userService.deactivateUser(id);	
 	}
-	
 
 
 }
