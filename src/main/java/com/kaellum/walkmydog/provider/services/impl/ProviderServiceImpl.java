@@ -10,6 +10,7 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,10 +40,18 @@ public class ProviderServiceImpl implements ProviderService{
 
 		ProviderDto resp = null;
 		try {
+			
+			if(providerRepository.findOne(Example.of(new Provider() {{setEmail(dto.getEmail());}})).isPresent())
+				throw WalkMyDogException.buildWarningDuplicate(CREATE_API, "The email address is already in use");
+			
 			Provider entity = modelMapper.map(dto, Provider.class);
 			entity.setCreatedBy(dto.getEmail());
+			//entity.setDeactivationDate(LocalDateTime.now());// REMOVE THAT CRAP LATER
 			
 			resp = modelMapper.map(providerRepository.save(entity), ProviderDto.class);
+		} catch (WalkMyDogException we) {
+			log.error(we.getAdditionalData(), we);
+			throw we;
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw WalkMyDogException.buildCriticalRuntime(CREATE_API, e, "Error creating the following provider : " + dto.toString());
@@ -54,8 +63,8 @@ public class ProviderServiceImpl implements ProviderService{
 	public List<ProviderDto> getAllProviders(Pageable page) {
 		
 		List<ProviderDto> resp = null;
-		try {
-			Page<Provider> entities = providerRepository.findAll(page);
+		try {		
+			Page<Provider> entities = providerRepository.findAllActiveProviders(page);
 			
 			resp = modelMapper.map(entities.getContent(), new TypeToken<List<ProviderDto>>() {}.getType());
 		} catch (Exception e) {

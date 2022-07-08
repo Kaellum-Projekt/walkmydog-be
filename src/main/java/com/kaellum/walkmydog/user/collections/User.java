@@ -22,8 +22,14 @@ public class User extends Audit{
 	@Id
 	private String id;
 	private String email;
-	private String password;
+	private String firstName;
+	private String lastName;
+	private String salt;
+	private String passwordHash;
 	private String role;
+	private Boolean isVerified;
+	private String verificationString;
+	private String passwordResetCode;
 	private String providerId;
 	private LocalDateTime deactivationDate;
 	

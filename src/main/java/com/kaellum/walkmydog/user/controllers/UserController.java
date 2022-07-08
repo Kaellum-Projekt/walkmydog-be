@@ -1,8 +1,11 @@
 package com.kaellum.walkmydog.user.controllers;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,14 +29,14 @@ public class UserController {
 	
 	@PostMapping("/signup")
 	@ResponseStatus(HttpStatus.CREATED)
-	public UserProfileDto createNewUser(@RequestBody UserProfileDto userProfile) {
+	public UserProfileDto createNewUser(@Valid @RequestBody UserProfileDto userProfile) {
 		return userService.addNewUser(userProfile);	
 	}
 	
 	@PutMapping("/update-password")
 	@ResponseStatus(HttpStatus.OK)
 	@PreAuthorize("@userResolverProvider.isOwner(#userPasswordUpdate)")
-	public boolean passwordUpdate(@RequestBody UserPasswordUpdate userPasswordUpdate, @RequestParam String userId) {
+	public boolean passwordUpdate(@Valid @RequestBody UserPasswordUpdate userPasswordUpdate, @RequestParam String userId) {
 		return userService.passwordUpdate(userPasswordUpdate, userId);	
 	}
 	
@@ -42,6 +45,12 @@ public class UserController {
 	@PreAuthorize("@userResolverProvider.isOwner(#userPasswordUpdate)")
 	public boolean deactivateUser(@RequestParam String id) {
 		return userService.deactivateUser(id);	
+	}
+	
+	@PutMapping(value = "/activation/{email}/{activationCode}")
+	@ResponseStatus(HttpStatus.OK)
+	public boolean activateUser(@PathVariable final String email, @PathVariable final  String activationCode) {
+		return userService.activateUser(email, activationCode);
 	}
 
 

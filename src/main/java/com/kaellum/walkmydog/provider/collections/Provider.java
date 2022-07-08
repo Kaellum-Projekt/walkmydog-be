@@ -1,6 +1,7 @@
 package com.kaellum.walkmydog.provider.collections;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import org.springframework.data.annotation.Id;
@@ -28,12 +29,12 @@ public class Provider extends Audit{
 	private String email;
 	private String phone;
 	private Double price;
+	private Object geoLocation;
 	private Set<WeekDays> weekDays;
-	private Set<TimeRange> timeRange;
+	private Set<TimeRange> timeRanges;
 	private Set<AddressDto> addresses;
 	private String userId;
-
-	
+	private LocalDateTime deactivationDate;
 	
 	@Override
 	public boolean isNew() {

@@ -11,9 +11,9 @@ public class UserDto {
 	
 	private String id;
 	@NotNull
-	private String username;
+	private String email;
 	@NotNull
-	private String password;
+	private String passwordHash;
 	@NotNull
 	private String role;
 	private String profileId;

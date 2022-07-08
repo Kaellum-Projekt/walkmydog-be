@@ -3,6 +3,7 @@ package com.kaellum.walkmydog.user.dto;
 import java.time.LocalDateTime;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,13 +17,16 @@ import lombok.RequiredArgsConstructor;
 public class UserProfileDto {
 	
 	private String id;
-	@NotNull
-	@Email
+	@NotNull @NotEmpty
+	private String firstName;
+	@NotNull @NotEmpty
+	private String lastName;
+	@NotNull @NotEmpty @Email
 	private String email;
-	@NotNull
+	@NotNull @NotEmpty
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private String password;
-	@NotNull
+	private String passwordHash;
+	@NotNull @NotEmpty
 	private String role;
 	@JsonProperty(value = "profile")
 	private ProviderDto providerDto;
