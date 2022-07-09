@@ -37,7 +37,7 @@ public class EmailService {
             message.setFrom(new InternetAddress("kaellumprojekt@hotmail.com"));
             message.setRecipients(
                     Message.RecipientType.TO,
-                    InternetAddress.parse("raphael.cremasco@gmail.com")
+                    InternetAddress.parse(email)
             );
             message.setSubject("Kaellum's User Activation Email");
             
@@ -50,7 +50,8 @@ public class EmailService {
             + "\r\n"
             + "<p>Thank you for your subscription</p>"
             + "<p>In order to utilize Kaellum's service, please click on the link below to activate your account</p>"
-            + "<p><a href=\"http://localhost:8080/user/activation/" + email +"/" + activationCode +"\">Active your account now :)</a></p>\r\n"
+            + "<p><i>(This link will expire in 30 minutes)<i></p>"
+            + "<p><a href=\"http://localhost:8080/api/user/activation/" + email +"/" + activationCode +"\">Active your account now :)</a></p>\r\n"
             + "\r\n"
             + "</body>\r\n"
             + "</html>";

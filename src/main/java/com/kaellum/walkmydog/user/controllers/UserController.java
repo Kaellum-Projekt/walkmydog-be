@@ -5,6 +5,7 @@ import javax.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -35,22 +36,28 @@ public class UserController {
 	
 	@PutMapping("/update-password")
 	@ResponseStatus(HttpStatus.OK)
-	@PreAuthorize("@userResolverProvider.isOwner(#userPasswordUpdate)")
+	@PreAuthorize("@userResolverUser.isOwner(#userPasswordUpdate)")
 	public boolean passwordUpdate(@Valid @RequestBody UserPasswordUpdate userPasswordUpdate, @RequestParam String userId) {
 		return userService.passwordUpdate(userPasswordUpdate, userId);	
 	}
 	
 	@DeleteMapping("/deactivate")
 	@ResponseStatus(HttpStatus.OK)
-	@PreAuthorize("@userResolverProvider.isOwner(#userPasswordUpdate)")
+	@PreAuthorize("@userResolverUser.isOwner(#id)")
 	public boolean deactivateUser(@RequestParam String id) {
 		return userService.deactivateUser(id);	
 	}
 	
-	@PutMapping(value = "/activation/{email}/{activationCode}")
+	@GetMapping(value = "/activation/{email}/{activationCode}")
 	@ResponseStatus(HttpStatus.OK)
 	public boolean activateUser(@PathVariable final String email, @PathVariable final  String activationCode) {
 		return userService.activateUser(email, activationCode);
+	}
+	
+	@PutMapping(value = "/new-activation/{email}")
+	@ResponseStatus(HttpStatus.OK)
+	public boolean resendActivationCode(@PathVariable final String email) {
+		return userService.resendActivationCode(email);
 	}
 
 

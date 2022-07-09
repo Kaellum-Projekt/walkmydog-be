@@ -90,10 +90,16 @@ public class TokenServiceImpl implements TokenService, UserDetailsService {
 	
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findUserByEmailAndVerified(username);
+        User user = userRepository.findUserByEmail(username);
         if(user == null) {
             log.error("User {} not found in the database", username);
           throw new UsernameNotFoundException("User not found in the database");
+        }else if (user != null && !user.getIsVerified()){
+        	log.error("User {} found in the database, however not activated", username);
+            throw new UsernameNotFoundException("User not activated yet");
+        }else if (user != null && user.getDeactivationDate() != null){
+        	log.error("User {} found in the database, however it is deactivated", username);
+            throw new UsernameNotFoundException("User not activated yet");            
         } else {
             log.info("User found in the database: {}", username);
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();

@@ -3,6 +3,7 @@ package com.kaellum.walkmydog.user.services.impl;
 import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.CREATE_API;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -70,7 +71,7 @@ public class UserServiceImpl implements UserService {
 			}
 			
 			//First creates a random activation string and sets the user as non-activated
-			String activationCode = RandomStringUtils.random(20, true, true);
+			String activationCode = generateActivationCode();
 			userDoc.setVerificationString(activationCode);
 			userDoc.setIsVerified(false);
 			
@@ -166,6 +167,9 @@ public class UserServiceImpl implements UserService {
 			if(!user.getVerificationString().equals(activationCode))
 				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, "Activation code is not valid");
 			
+			if(isValidationCodeExpired(activationCode))
+				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, "Activation code is expired!");
+			
 			USERNAME = user.getEmail();
 			user.setIsVerified(true);
 			userRepository.save(user);
@@ -178,4 +182,65 @@ public class UserServiceImpl implements UserService {
 		}		
 		return true;
 	}
+	
+	@Override
+	public boolean resendActivationCode(String email) throws WalkMyDogException {
+		
+		try {
+			Optional<User> userOpt = userRepository.findUserByEmailAndNotVerified(email);
+			if(!userOpt.isPresent())
+				throw WalkMyDogException.buildWarningNotFound(WalkMyDogExApiTypes.UPDATE_API, "User not found or already verified");
+			
+			User user = userOpt.get();
+			
+			String activationCode = generateActivationCode();
+			user.setVerificationString(activationCode);
+			
+			userRepository.save(user);
+			
+			EmailDetailsDtos emDtos = new EmailDetailsDtos(user.getFirstName(), user.getEmail(), activationCode);
+			emailSenderEventPublisher.publishEmailSenderEvent(emDtos);
+		} catch (WalkMyDogException we) {
+			log.error(we.getErrorMessage(), we);
+			throw we;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.UPDATE_API, e);
+		}	
+		return true;
+	}
+	
+	private String generateActivationCode() {
+		StringBuilder actCode = new StringBuilder();
+		actCode.append(RandomStringUtils.random(3, true, true));
+		actCode.append(StringUtils.leftPad(String.valueOf(LocalDateTime.now().getDayOfMonth()), 2, "0"));
+		actCode.append(RandomStringUtils.random(3, true, true));
+		actCode.append(StringUtils.leftPad(String.valueOf(LocalDateTime.now().getMonthValue()), 2, "0"));
+		actCode.append(RandomStringUtils.random(3, true, true));
+		actCode.append(String.valueOf(LocalDateTime.now().getYear()));
+		actCode.append(RandomStringUtils.random(3, true, true));
+		actCode.append(StringUtils.leftPad(String.valueOf(LocalDateTime.now().getHour()), 2, "0"));
+		actCode.append(RandomStringUtils.random(3, true, true));
+		actCode.append(StringUtils.leftPad(String.valueOf(LocalDateTime.now().getMinute()), 2, "0"));
+		return actCode.toString();
+	}
+
+	private boolean isValidationCodeExpired(String activationCode) {
+		
+		int day = Integer.valueOf(activationCode.substring(3,5));
+		int month = Integer.valueOf(activationCode.substring(8,10));
+		int year = Integer.valueOf(activationCode.substring(13,17));
+		int hour = Integer.valueOf(activationCode.substring(20,22));
+		int min = Integer.valueOf(activationCode.substring(25,27));
+		
+		LocalDateTime dateFromCode = LocalDateTime.of(year, month, day, hour, min).plusMinutes(30);
+		
+		long minutes = ChronoUnit.MINUTES.between(LocalDateTime.now(), dateFromCode);
+		
+		if(minutes < 0)
+			return true;
+		return false;
+	}
+	
+	
 }
