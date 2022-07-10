@@ -5,6 +5,7 @@ import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.CREATE_A
 import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.READ_API;
 import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.UPDATE_API;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,9 @@ import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.kaellum.walkmydog.exception.WalkMyDogException;
@@ -29,8 +33,10 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ProviderServiceImpl implements ProviderService{
 
-	private ModelMapper modelMapper;
-	private ProviderRepository providerRepository;
+	private final ModelMapper modelMapper;
+	private final ProviderRepository providerRepository;
+	private final MongoTemplate mongoTemplate;
+	
 		
 	@Override
 	public ProviderDto addProvider(ProviderDto dto) {
@@ -131,11 +137,35 @@ public class ProviderServiceImpl implements ProviderService{
 			Pageable pageable) throws WalkMyDogException {
 		
 		try {
-//			List<Provider> providersDoc =
-//					providerRepository.findProviderByParams(firstName, lastName, price, timeRange, province, city, pageable);
-//					
-//					return modelMapper.map(providersDoc, new TypeToken<List<ProviderDto>>() {}.getType());
-					return null;
+			List<Provider> dtoReturn = null;
+			
+			final Query query = new Query().with(pageable);
+			final List<Criteria> criteria = new ArrayList<>();
+			
+			criteria.add(Criteria.where("addresses.city").is(city));
+			
+			if(firstName.isPresent())
+				criteria.add(Criteria.where("firstName").is(firstName.get()));
+			
+			if(lastName.isPresent())
+				criteria.add(Criteria.where("lastName").is(lastName.get()));
+			
+			if(price.isPresent())
+				criteria.add(Criteria.where("price").is(price.get()));
+			
+			if(timeRange.isPresent())
+				criteria.add(Criteria.where("timeRanges").in(timeRange.get()));
+			
+			if(province.isPresent())
+				criteria.add(Criteria.where("addresses.province").is(province.get()));
+				
+			if (!criteria.isEmpty())
+				query.addCriteria(new Criteria().andOperator(criteria.toArray(new Criteria[criteria.size()])));
+			
+			dtoReturn = mongoTemplate.find(query, Provider.class);	
+			
+			return modelMapper.map(dtoReturn, new TypeToken<List<ProviderDto>>() {}.getType());
+
 		} catch (WalkMyDogException e) {
 			log.error(e.getErrorMessage(), e);
 			throw e;

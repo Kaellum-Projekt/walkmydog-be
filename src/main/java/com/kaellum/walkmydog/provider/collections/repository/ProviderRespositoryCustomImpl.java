@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
@@ -18,21 +18,22 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 //https://medium.com/javarevisited/spring-boot-mongo-template-best-get-api-filtering-with-multiple-properties-13c68de5ae02
-//@Repository
+@Component
 @RequiredArgsConstructor
 @Log4j2
-public class ProviderCustomRespositoryImpl implements ProviderCustomRepository {
+public class ProviderRespositoryCustomImpl implements ProviderRepositoryCustom {
 	
 	private final MongoTemplate mongoTemplate;
 
 	@Override
-	public List<Provider> findProviderByParams(Optional<String> firstName, Optional<String> lastName,
+	public List<Provider> findBy(Optional<String> firstName, Optional<String> lastName,
 			Optional<Double> price, Optional<List<Integer>> timeRange, Optional<String> province, String city,
 			Pageable pageable) throws WalkMyDogException {
 		
 		List<Provider> dtoReturn = new ArrayList<>();
 		
 		try {
+			System.out.println("Entrou Aqui!");
 			final Query query = new Query().with(pageable);
 			final List<Criteria> criteria = new ArrayList<>();
 			
@@ -67,5 +68,4 @@ public class ProviderCustomRespositoryImpl implements ProviderCustomRepository {
 		}
 		return dtoReturn;
 	}
-
 }

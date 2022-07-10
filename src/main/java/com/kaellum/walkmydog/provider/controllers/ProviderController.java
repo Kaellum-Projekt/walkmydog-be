@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,6 +44,14 @@ public class ProviderController {
 	
 	@GetMapping("/")
 	@ResponseStatus(HttpStatus.OK)
+	public String advancedSearch2 (
+			@RequestParam Optional<String> firstName, 
+			@PageableDefault Pageable pageable ) throws WalkMyDogException {
+		return "ok";
+	}
+	
+	@GetMapping
+	@ResponseStatus(HttpStatus.OK)
 	public List<ProviderDto> advancedSearch (
 			@RequestParam Optional<String> firstName, 
 			@RequestParam Optional<String> lastName,
@@ -53,7 +60,7 @@ public class ProviderController {
 			@RequestParam Optional<String> province,
 			@RequestParam String city,
 			@PageableDefault Pageable pageable ) throws WalkMyDogException {
-		return null;//providerService.getProviderById(id);
+		return providerService.advancedSearch(firstName, lastName, price, timeRange, province, city, pageable);
 	}
 	
 	@PostMapping("/add")

@@ -4,13 +4,15 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.repository.Query;
 
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.provider.collections.Provider;
 
-public interface ProviderCustomRepository {
+public interface ProviderRepositoryCustom {
 	
-	List<Provider> findProviderByParams(
+	@Query
+	List<Provider> findBy(
 			Optional<String> firstName, 
 			Optional<String> lastName,
 			Optional<Double> price,
@@ -18,5 +20,7 @@ public interface ProviderCustomRepository {
 			Optional<String> province,
 			String city,
 			Pageable pageable) throws WalkMyDogException;
+	
+//	List<Provider> findBy(Optional<String> name, Optional<String> ln);
 
 }
