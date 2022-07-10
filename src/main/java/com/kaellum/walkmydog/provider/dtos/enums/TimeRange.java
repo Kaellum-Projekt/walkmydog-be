@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum TimeRange {
-	SIX_TO_ELEVEN("0"), ELEVEN_TO_FIFTEEN("1"), FIFTEEN_TO_TWENTY_TWO("2");
+	SIX_TO_ELEVEN("0"), ELEVEN_TO_FIFTEEN("1"), FIFTEEN_TO_TWENTY_TWO("2"), ALL_DAY("3");
 	
 	@JsonValue
 	private final String timeRangeCode; 

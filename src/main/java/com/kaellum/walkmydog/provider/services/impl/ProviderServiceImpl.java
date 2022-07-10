@@ -6,10 +6,10 @@ import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.READ_API
 import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.UPDATE_API;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,10 +29,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ProviderServiceImpl implements ProviderService{
 
-	@Autowired
 	private ModelMapper modelMapper;
-	
-	@Autowired
 	private ProviderRepository providerRepository;
 		
 	@Override
@@ -108,6 +105,7 @@ public class ProviderServiceImpl implements ProviderService{
 			
 			resp = modelMapper.map(providerRepository.save(entity), ProviderDto.class);
 		} catch (WalkMyDogException e) {
+			log.error(e.getErrorMessage(), e);
 			throw e;
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
@@ -126,5 +124,25 @@ public class ProviderServiceImpl implements ProviderService{
 			return false;
 		}
 	}
+
+	@Override
+	public List<ProviderDto> advancedSearch(Optional<String> firstName, Optional<String> lastName,
+			Optional<Double> price, Optional<List<Integer>> timeRange, Optional<String> province, String city,
+			Pageable pageable) throws WalkMyDogException {
+		
+		try {
+//			List<Provider> providersDoc =
+//					providerRepository.findProviderByParams(firstName, lastName, price, timeRange, province, city, pageable);
+//					
+//					return modelMapper.map(providersDoc, new TypeToken<List<ProviderDto>>() {}.getType());
+					return null;
+		} catch (WalkMyDogException e) {
+			log.error(e.getErrorMessage(), e);
+			throw e;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw WalkMyDogException.buildCriticalRuntime(UPDATE_API, e);
+		}
+	}		
 
 }

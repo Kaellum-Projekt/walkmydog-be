@@ -24,6 +24,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kaellum.walkmydog.exception.WalkMyDogException;
+import com.kaellum.walkmydog.exception.dto.WalkMyDogExceptionResponseDto;
+import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
+import com.kaellum.walkmydog.exception.enums.WalkMyDogExFrontendHandling;
+import com.kaellum.walkmydog.exception.enums.WalkMyDogExReasons;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -33,7 +38,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
-
+    
     public CustomAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
@@ -69,5 +74,22 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         tokens.put("refresh_token", refresh_token);
         response.setContentType(APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getOutputStream(), tokens);
+    }
+    
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+            AuthenticationException failed) throws IOException, ServletException {
+    	response.setContentType(APPLICATION_JSON_VALUE);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        WalkMyDogException e = WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.READ_API, failed.getMessage());        
+        WalkMyDogExceptionResponseDto res = WalkMyDogExceptionResponseDto.builder()
+		.code(e.getCode())
+		.errorMessage(e.getErrorMessage())
+		.systemErrorMessage(e.getSystemErrorMessage())
+		.frontendHandling(e.getFrontendHandling() != null ? e.getFrontendHandling().getCode() : WalkMyDogExFrontendHandling.NONE.getCode())
+		.exceptionReason(e.getExceptionReason() != null ? e.getExceptionReason().getCode() : WalkMyDogExReasons.NONE.getCode())
+		.apiType(e.getApiType() != null ? e.getApiType().getCode() : WalkMyDogExApiTypes.NONE.getCode())
+		.build();
+        new ObjectMapper().writeValue(response.getOutputStream(), res);
     }
 }
