@@ -36,7 +36,7 @@ public class UserController {
 	
 	@PutMapping("/update-password")
 	@ResponseStatus(HttpStatus.OK)
-	@PreAuthorize("@userResolverUser.isOwner(#userPasswordUpdate)")
+	@PreAuthorize("@userResolverUser.isOwner(#userId)")
 	public boolean passwordUpdate(@Valid @RequestBody UserPasswordUpdate userPasswordUpdate, @RequestParam String userId) {
 		return userService.passwordUpdate(userPasswordUpdate, userId);	
 	}

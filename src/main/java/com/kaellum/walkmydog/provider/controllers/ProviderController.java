@@ -30,7 +30,7 @@ public class ProviderController {
 	
 	private final ProviderService providerService;
 	
-	@GetMapping("/all")
+	@GetMapping("/")
 	@ResponseStatus(HttpStatus.OK)
 	public List<ProviderDto> getAllProvider (@PageableDefault Pageable pageable){
 		return providerService.getAllProviders(pageable);
@@ -40,14 +40,6 @@ public class ProviderController {
 	@ResponseStatus(HttpStatus.OK)
 	public ProviderDto getProviderById (@PathVariable String id) throws WalkMyDogException {
 		return providerService.getProviderById(id);
-	}
-	
-	@GetMapping("/")
-	@ResponseStatus(HttpStatus.OK)
-	public String advancedSearch2 (
-			@RequestParam Optional<String> firstName, 
-			@PageableDefault Pageable pageable ) throws WalkMyDogException {
-		return "ok";
 	}
 	
 	@GetMapping

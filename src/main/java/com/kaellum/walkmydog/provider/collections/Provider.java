@@ -30,11 +30,12 @@ public class Provider extends Audit{
 	private String phone;
 	private Double price;
 	private Object geoLocation;
-	private Set<WeekDays> weekDays;
-	private Set<TimeRange> timeRanges;
-	private Set<AddressDto> addresses;
+	private Set<WeekDays> days;
+	private Set<TimeRange> hours;
+	private Set<AddressDto> address;
 	private String userId;
 	private LocalDateTime deactivationDate;
+	private Set<Reviews> ratings;
 	
 	@Override
 	public boolean isNew() {
