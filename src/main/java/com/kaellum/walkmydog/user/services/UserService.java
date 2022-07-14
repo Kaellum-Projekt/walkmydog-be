@@ -12,4 +12,6 @@ public interface UserService {
     Boolean deactivateUser (String id) throws WalkMyDogException;
 	boolean activateUser(String email, String activationCode)  throws WalkMyDogException;
 	boolean resendActivationCode(String email) throws WalkMyDogException;
+	void resetForgotPassword(String email) throws WalkMyDogException;
+	Boolean passwordReset(UserPasswordUpdate userPasswordUpdate, String code) throws WalkMyDogException;
 }

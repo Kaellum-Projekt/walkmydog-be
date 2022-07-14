@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserPasswordUpdate {
 	
-	@NotNull
 	private String currentPassword;
 	@NotNull
 	private String newPassword;

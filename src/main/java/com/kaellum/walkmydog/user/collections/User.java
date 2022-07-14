@@ -25,11 +25,10 @@ public class User extends Audit{
 	private String firstName;
 	private String lastName;
 	private String salt;
-	private String passwordHash;
+	private String password;
 	private String role;
 	private Boolean isVerified;
-	private String verificationString;
-	private String passwordResetCode;
+	private String userTempCode;
 	private String providerId;
 	private LocalDateTime deactivationDate;
 	

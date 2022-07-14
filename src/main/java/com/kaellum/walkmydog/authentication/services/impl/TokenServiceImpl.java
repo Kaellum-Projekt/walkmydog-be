@@ -57,7 +57,7 @@ public class TokenServiceImpl implements TokenService, UserDetailsService {
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(refresh_token);
                 String username = decodedJWT.getSubject();
-                User user = userRepository.findUserByEmailAndVerified(username);
+                User user = userRepository.findUserByEmailAndVerified(username).get();
                 String access_token = JWT.create()
                         .withSubject(user.getEmail())
                         .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 1000))
@@ -104,7 +104,7 @@ public class TokenServiceImpl implements TokenService, UserDetailsService {
             log.info("User found in the database: {}", username);
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority(user.getRole()));
-            return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPasswordHash(), authorities);
+            return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
         }
     }
     

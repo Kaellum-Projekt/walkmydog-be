@@ -19,7 +19,8 @@ public class EmailSenderEventListener implements ApplicationListener<EmailSender
 	@Override
 	public void onApplicationEvent(EmailSenderEvent event) {
 		try {
-			emailService.sendMail(event.getDto().getUserFullName(), event.getDto().getEmail(), event.getDto().getActivationCode());
+			emailService.sendMail(event.getDto().getUserFullName(), event.getDto().getEmail(), 
+					event.getDto().getActivationCode(), event.getDto().getEmailType());
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, "Error sending activation email");

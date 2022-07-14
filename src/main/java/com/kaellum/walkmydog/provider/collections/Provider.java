@@ -23,10 +23,7 @@ public class Provider extends Audit{
 	
 	@Id
 	private String id;
-	private String firstName;
-	private String lastName;
 	private LocalDate dob;
-	private String email;
 	private String phone;
 	private Double price;
 	private Object geoLocation;

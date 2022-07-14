@@ -59,6 +59,18 @@ public class UserController {
 	public boolean resendActivationCode(@PathVariable final String email) {
 		return userService.resendActivationCode(email);
 	}
+	
+	@PutMapping(value = "/forgot-password/{email}")
+	@ResponseStatus(HttpStatus.OK)
+	public void resetForgotPassword(@PathVariable final String email) {
+		userService.resetForgotPassword(email);
+	}
+	
+	@PutMapping(value = "/{passwordResetCode}/reset-password")
+	@ResponseStatus(HttpStatus.OK)
+	public void passwordReset(@Valid @RequestBody UserPasswordUpdate userPasswordUpdate, @PathVariable String passwordResetCode) {
+		userService.passwordReset(userPasswordUpdate, passwordResetCode);
+	}
 
 
 }

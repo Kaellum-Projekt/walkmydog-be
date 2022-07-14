@@ -10,7 +10,7 @@ import com.kaellum.walkmydog.provider.dtos.ProviderDto;
 
 public interface ProviderService {
 	
-	ProviderDto addProvider (ProviderDto dto);
+	ProviderDto addProvider (ProviderDto dto, String email);
 	
 	List<ProviderDto> getAllProviders (Pageable page);
 	

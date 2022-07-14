@@ -10,9 +10,10 @@ import lombok.NoArgsConstructor;
 public class AddressDto{
 	
 	private String id;
-	private String address;
+	private String street;
+	private String street2;
 	private String city;
 	private String province;
 	private String country;
-	private String zipCode;
+	private String postalCode;
 }

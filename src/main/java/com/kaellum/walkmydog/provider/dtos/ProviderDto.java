@@ -1,11 +1,12 @@
 package com.kaellum.walkmydog.provider.dtos;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 
+import com.kaellum.walkmydog.provider.collections.Ratings;
 import com.kaellum.walkmydog.provider.dtos.enums.TimeRange;
 import com.kaellum.walkmydog.provider.dtos.enums.WeekDays;
 
@@ -20,18 +21,18 @@ public class ProviderDto {
 	
 	private String id;
 	@NotNull
-	private String firstName;
-	@NotNull
-	private String lastName;
-	@NotNull
 	private LocalDate dob;
-	@Email
-	private String email;
 	@NotNull
 	private String phone;
 	private Double price;
-	private Set<WeekDays> weekDays;
-	private Set<TimeRange> timeRange;
+	private Set<WeekDays> days;
+	private Set<TimeRange> hours;
+	private String geoLocation;
 	@NotNull
-	private Set<AddressDto> addresses;
+	private Set<AddressDto> address;
+	private Ratings ratings;
+	private String createdBy;
+    private LocalDateTime createdDate;
+    private String lastModifiedBy;
+    private LocalDateTime lastModifiedDate;
 }

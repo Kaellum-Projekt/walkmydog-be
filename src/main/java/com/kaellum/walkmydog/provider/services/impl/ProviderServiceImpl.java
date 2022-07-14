@@ -11,7 +11,6 @@ import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -39,16 +38,13 @@ public class ProviderServiceImpl implements ProviderService{
 	
 		
 	@Override
-	public ProviderDto addProvider(ProviderDto dto) {
+	public ProviderDto addProvider(ProviderDto dto, String email) {
 
 		ProviderDto resp = null;
 		try {
 			
-			if(providerRepository.findOne(Example.of(new Provider() {{setEmail(dto.getEmail());}})).isPresent())
-				throw WalkMyDogException.buildWarningDuplicate(CREATE_API, "The email address is already in use");
-			
 			Provider entity = modelMapper.map(dto, Provider.class);
-			entity.setCreatedBy(dto.getEmail());
+			entity.setCreatedBy(email);
 			//entity.setDeactivationDate(LocalDateTime.now());// REMOVE THAT CRAP LATER
 			
 			resp = modelMapper.map(providerRepository.save(entity), ProviderDto.class);

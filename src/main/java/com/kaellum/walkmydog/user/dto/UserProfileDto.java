@@ -25,7 +25,7 @@ public class UserProfileDto {
 	private String email;
 	@NotNull @NotEmpty
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-	private String passwordHash;
+	private String password;
 	@NotNull @NotEmpty
 	private String role;
 	@JsonProperty(value = "profile")

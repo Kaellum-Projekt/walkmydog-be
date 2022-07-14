@@ -10,5 +10,6 @@ public class EmailDetailsDtos {
 	private String userFullName;
 	private String email;
 	private String activationCode;
+	private EmailType emailType;
 
 }

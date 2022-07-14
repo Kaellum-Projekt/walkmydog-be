@@ -30,7 +30,7 @@ public class ProviderController {
 	
 	private final ProviderService providerService;
 	
-	@GetMapping("/")
+	@GetMapping("/all")
 	@ResponseStatus(HttpStatus.OK)
 	public List<ProviderDto> getAllProvider (@PageableDefault Pageable pageable){
 		return providerService.getAllProviders(pageable);
@@ -57,8 +57,8 @@ public class ProviderController {
 	
 	@PostMapping("/add")
 	@ResponseStatus(HttpStatus.OK)
-	public ProviderDto addProvider (@RequestBody ProviderDto dto) throws WalkMyDogException {
-		return providerService.addProvider(dto);
+	public ProviderDto addProvider (@RequestBody ProviderDto dto, @RequestParam String email) throws WalkMyDogException {
+		return providerService.addProvider(dto, email);
 	}
 	
 	@PutMapping("/update")

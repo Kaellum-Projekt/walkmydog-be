@@ -2,20 +2,36 @@ package com.kaellum.walkmydog.emailsender;
 
 import java.util.Properties;
 
-import javax.mail.*;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 @Component
+@PropertySource("email-messages.properties")
 public class EmailService {
 
-    public void sendMail(String userFullName, String email, String activationCode) throws Exception {
+    @Value("${activation.email.service.subject}") 
+    String activationSubject;
+    @Value("${activation.email.service.body}") 
+    String activationBody;
+    @Value("${reset-password.email.service.subject}") 
+    String resetPassSubject;
+    @Value("${reset-password.email.service.body}") 
+    String resetPassBody;
+    
+	public void sendMail(String userFullName, String email, String code, EmailType emailType) throws Exception {
     	
     	final String username = "kaellumprojekt@hotmail.com";
         final String password = "gotosky2020!";
-
+        
         Properties prop = new Properties();
         
         prop.put("mail.smtp.host", "smtp.office365.com");
@@ -32,31 +48,42 @@ public class EmailService {
                 });
 
         try {
+        	
+        	final String subject;
+            final String body;
+        	
+        	if(emailType.equals(EmailType.ACTIVATION)) {
+        		subject = activationSubject;
+        		body = String.format(activationBody, userFullName, email, code);
+        	}else {
+        		subject = resetPassSubject;
+        		body = String.format(resetPassBody, userFullName, email, code);
+        	}
 
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress("kaellumprojekt@hotmail.com"));
             message.setRecipients(
                     Message.RecipientType.TO,
-                    InternetAddress.parse(email)
-            );
-            message.setSubject("Kaellum's User Activation Email");
+                    InternetAddress.parse(email));
             
-            String emailBody =
-            "<!DOCTYPE html>\r\n"
-            + "<html>\r\n"
-            + "<body>\r\n"
-            + "\r\n"
-            + "<p><b>Dear " + userFullName + ",<b></p>\r\n"
-            + "\r\n"
-            + "<p>Thank you for your subscription</p>"
-            + "<p>In order to utilize Kaellum's service, please click on the link below to activate your account</p>"
-            + "<p><i>(This link will expire in 30 minutes)<i></p>"
-            + "<p><a href=\"http://localhost:8080/api/user/activation/" + email +"/" + activationCode +"\">Active your account now :)</a></p>\r\n"
-            + "\r\n"
-            + "</body>\r\n"
-            + "</html>";
+            message.setSubject(subject);
             
-            message.setContent(emailBody, "text/html");
+//            String emailBody =
+//            "<!DOCTYPE html>\r\n"
+//            + "<html>\r\n"
+//            + "<body>\r\n"
+//            + "\r\n"
+//            + "<p><b>Dear " + userFullName + ",<b></p>\r\n"
+//            + "\r\n"
+//            + "<p>Thank you for your subscription</p>"
+//            + "<p>In order to utilize Kaellum's service, please click on the link below to activate your account</p>"
+//            + "<p><i>(This link will expire in 30 minutes)<i></p>"
+//            + "<p><a href=\"http://localhost:8080/api/user/activation/" + email +"/" + code +"\">Active your account now :)</a></p>\r\n"
+//            + "\r\n"
+//            + "</body>\r\n"
+//            + "</html>";
+            
+            message.setContent(body, "text/html");
             
             Transport.send(message);
 

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.kaellum.walkmydog.emailsender.EmailDetailsDtos;
 import com.kaellum.walkmydog.emailsender.EmailSenderEventPublisher;
+import com.kaellum.walkmydog.emailsender.EmailType;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
 import com.kaellum.walkmydog.provider.dtos.ProviderDto;
@@ -46,7 +47,7 @@ public class UserServiceImpl implements UserService {
 		UserProfileDto dtoReturn = null;
 		try {
 			if(user == null)
-				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
+				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
 						"User object must be provided");
 			
 			User example = new User();
@@ -55,24 +56,23 @@ public class UserServiceImpl implements UserService {
 				throw WalkMyDogException.buildWarningDuplicate(CREATE_API, "The email address is already in use");
 
 			User userDoc = modelMapper.map(user, User.class);
-			String password = passwordEncoder.encode(user.getPasswordHash());
-			userDoc.setPasswordHash(password);
+			String password = passwordEncoder.encode(user.getPassword());
+			userDoc.setPassword(password);
 			USERNAME = user.getEmail();
 			
 			ProviderDto provider = null;
 			if(user.getRole().equals("ROLE_PROVIDER")) {
 				if(user.getProviderDto() == null)
-					WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
+					throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
 							"Provider object must be provided");
 				ProviderDto providerDto = user.getProviderDto();
-				providerDto.setEmail(user.getEmail());
-				provider = providerService.addProvider(user.getProviderDto());
+				provider = providerService.addProvider(providerDto, user.getEmail());
 				userDoc.setProviderId(provider.getId());
 			}
 			
 			//First creates a random activation string and sets the user as non-activated
 			String activationCode = generateActivationCode();
-			userDoc.setVerificationString(activationCode);
+			userDoc.setUserTempCode(activationCode);
 			userDoc.setIsVerified(false);
 			
 			userRepository.save(userDoc);		
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
 			dtoReturn.setProviderDto(provider);
 			
 			//Send email for activation
-		    EmailDetailsDtos emDtos = new EmailDetailsDtos(user.getFirstName(), user.getEmail(), activationCode);
+		    EmailDetailsDtos emDtos = new EmailDetailsDtos(user.getFirstName(), user.getEmail(), activationCode, EmailType.ACTIVATION);
 			emailSenderEventPublisher.publishEmailSenderEvent(emDtos);
 			
 		} catch (WalkMyDogException we) {
@@ -89,7 +89,7 @@ public class UserServiceImpl implements UserService {
 			throw we;
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
+			throw WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
 		}
 		return dtoReturn;
 	}
@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService {
 			Optional<User> userOpt = userRepository.findById(id);
 			
 			if(userOpt.isEmpty()) 
-				WalkMyDogException.buildWarningNotFound(WalkMyDogExApiTypes.UPDATE_API, "User id does not exist");
+				throw WalkMyDogException.buildWarningNotFound(WalkMyDogExApiTypes.UPDATE_API, "User id does not exist");
 
 			User user = userOpt.get();
 			user.setDeactivationDate(LocalDateTime.now());
@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService {
 			throw we;
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
+			throw WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
 		}
 		return false;
 	}
@@ -123,23 +123,23 @@ public class UserServiceImpl implements UserService {
 			if(StringUtils.isBlank(userPasswordUpdate.getCurrentPassword()) ||
 					StringUtils.isBlank(userPasswordUpdate.getNewPassword()) ||
 					StringUtils.isBlank(userId))
-				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, "All three parameters are mandatory");
+				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, "All three parameters are mandatory");
 			
 			Optional<User> userOpt = userRepository.findById(userId);
 			
 			if(userOpt.isEmpty()) 
-				WalkMyDogException.buildWarningNotFound(WalkMyDogExApiTypes.UPDATE_API, "User id does not exist");
+				throw WalkMyDogException.buildWarningNotFound(WalkMyDogExApiTypes.UPDATE_API, "User id does not exist");
 
 			User user = userOpt.get();
 			
 			//Validates current password
 			String passwordProvided = passwordEncoder.encode(userPasswordUpdate.getCurrentPassword());
 			if(!passwordProvided.equals(user.getEmail()))
-				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, 
+				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, 
 						"Current Password is not Valid.<br>Please, Try it again!");
 			
 			String newPassword = passwordEncoder.encode(userPasswordUpdate.getNewPassword());
-			user.setPasswordHash(newPassword);			
+			user.setPassword(newPassword);			
 			if(userRepository.save(user) != null)
 				return true;
 		} catch (WalkMyDogException we) {
@@ -147,7 +147,7 @@ public class UserServiceImpl implements UserService {
 			throw we;
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
+			throw WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
 		}
 		return false;
 	}
@@ -164,7 +164,7 @@ public class UserServiceImpl implements UserService {
 			
 			User user = userOpt.get();
 			
-			if(!user.getVerificationString().equals(activationCode))
+			if(!user.getUserTempCode().equals(activationCode))
 				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, "Activation code is not valid");
 			
 			if(isValidationCodeExpired(activationCode))
@@ -194,11 +194,11 @@ public class UserServiceImpl implements UserService {
 			User user = userOpt.get();
 			
 			String activationCode = generateActivationCode();
-			user.setVerificationString(activationCode);
+			user.setUserTempCode(activationCode);
 			
 			userRepository.save(user);
 			
-			EmailDetailsDtos emDtos = new EmailDetailsDtos(user.getFirstName(), user.getEmail(), activationCode);
+			EmailDetailsDtos emDtos = new EmailDetailsDtos(user.getFirstName(), user.getEmail(), activationCode, EmailType.ACTIVATION);
 			emailSenderEventPublisher.publishEmailSenderEvent(emDtos);
 		} catch (WalkMyDogException we) {
 			log.error(we.getErrorMessage(), we);
@@ -208,6 +208,60 @@ public class UserServiceImpl implements UserService {
 			throw WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.UPDATE_API, e);
 		}	
 		return true;
+	}
+	
+	@Override
+	public void resetForgotPassword(String email) throws WalkMyDogException {
+		try {
+			Optional<User> userOpt = userRepository.findUserByEmailAndVerified(email);
+			if(!userOpt.isPresent())
+				throw WalkMyDogException.buildWarningNotFound(WalkMyDogExApiTypes.UPDATE_API, "User not found");
+			
+			User user = userOpt.get();
+			
+			String newCode = generateActivationCode();
+			user.setUserTempCode(newCode);
+			
+			userRepository.save(user);
+			
+			EmailDetailsDtos emDtos = new EmailDetailsDtos(user.getFirstName(), user.getEmail(), newCode, EmailType.RESETPASS);
+			emailSenderEventPublisher.publishEmailSenderEvent(emDtos);
+		} catch (WalkMyDogException we) {
+			log.error(we.getErrorMessage(), we);
+			throw we;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.UPDATE_API, e);
+		}	
+	}
+	
+	@Override
+	public Boolean passwordReset(UserPasswordUpdate userPasswordUpdate, String code) throws WalkMyDogException {
+		try {
+			if(StringUtils.isBlank(userPasswordUpdate.getNewPassword()) || StringUtils.isBlank(code))
+				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, "All parameters are mandatory");
+			
+			Optional<User> userOpt = userRepository.findByUserTempCode(code);
+			
+			if(userOpt.isEmpty()) 
+				throw WalkMyDogException.buildWarningNotFound(WalkMyDogExApiTypes.UPDATE_API, "Reset passoword link invalid!");
+			
+			User user = userOpt.get();
+			if(isValidationCodeExpired(user.getUserTempCode()))
+				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, "Reset password link is expired!");
+			
+			String newPassword = passwordEncoder.encode(userPasswordUpdate.getNewPassword());
+			user.setPassword(newPassword);			
+			if(userRepository.save(user) != null)
+				return true;
+		} catch (WalkMyDogException we) {
+			log.error(we.getMessage(), we);
+			throw we;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
+		}
+		return false;
 	}
 	
 	private String generateActivationCode() {
@@ -222,6 +276,7 @@ public class UserServiceImpl implements UserService {
 		actCode.append(StringUtils.leftPad(String.valueOf(LocalDateTime.now().getHour()), 2, "0"));
 		actCode.append(RandomStringUtils.random(3, true, true));
 		actCode.append(StringUtils.leftPad(String.valueOf(LocalDateTime.now().getMinute()), 2, "0"));
+		actCode.append(RandomStringUtils.random(6, true, true));
 		return actCode.toString();
 	}
 

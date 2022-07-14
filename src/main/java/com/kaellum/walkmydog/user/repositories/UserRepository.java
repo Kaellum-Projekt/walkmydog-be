@@ -12,12 +12,14 @@ import com.kaellum.walkmydog.user.collections.User;
 public interface UserRepository extends MongoRepository<User, String>{
 	
 	@Query("{ 'isVerified' : true, 'email' : ?0 }")
-	User findUserByEmailAndVerified(String email);
+	Optional<User>  findUserByEmailAndVerified(String email);
 	
 	@Query("{ 'isVerified' : false, 'email' : ?0 }")
 	Optional<User> findUserByEmailAndNotVerified(String email); 
 	
 	User findUserByEmail(String email);
+	
+	Optional<User> findByUserTempCode(String userTempCode);
 	
 
 }
