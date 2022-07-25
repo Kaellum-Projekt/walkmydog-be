@@ -50,7 +50,7 @@ public class ProviderController {
 			@RequestParam Optional<Double> price,
 			@RequestParam Optional<List<Integer>> timeRange,
 			@RequestParam Optional<String> province,
-			@RequestParam String city,
+			@RequestParam Optional<String> city,
 			@PageableDefault Pageable pageable ) throws WalkMyDogException {
 		return providerService.advancedSearch(firstName, lastName, price, timeRange, province, city, pageable);
 	}

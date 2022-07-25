@@ -133,8 +133,8 @@ public class UserServiceImpl implements UserService {
 			User user = userOpt.get();
 			
 			//Validates current password
-			String passwordProvided = passwordEncoder.encode(userPasswordUpdate.getCurrentPassword());
-			if(!passwordProvided.equals(user.getEmail()))
+
+			if(!passwordEncoder.matches(userPasswordUpdate.getCurrentPassword(), user.getPassword()))
 				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, 
 						"Current Password is not Valid.<br>Please, Try it again!");
 			
@@ -217,6 +217,8 @@ public class UserServiceImpl implements UserService {
 			if(!userOpt.isPresent())
 				throw WalkMyDogException.buildWarningNotFound(WalkMyDogExApiTypes.UPDATE_API, "User not found");
 			
+			USERNAME = email;
+			
 			User user = userOpt.get();
 			
 			String newCode = generateActivationCode();
@@ -249,6 +251,8 @@ public class UserServiceImpl implements UserService {
 			User user = userOpt.get();
 			if(isValidationCodeExpired(user.getUserTempCode()))
 				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, "Reset password link is expired!");
+			
+			USERNAME = user.getEmail();
 			
 			String newPassword = passwordEncoder.encode(userPasswordUpdate.getNewPassword());
 			user.setPassword(newPassword);			

@@ -28,7 +28,7 @@ public class SecurityUserResolverProvider {
 			try {
 				Method method = id.getClass().getMethod("getId");
 				String idValue = (String) method.invoke(id);
-				userRecord = providerRepository.findById(idValue).get().getUserId();
+				userRecord = providerRepository.findById(idValue).get().getCreatedBy();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

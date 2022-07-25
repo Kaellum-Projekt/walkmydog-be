@@ -42,7 +42,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(STATELESS);
         http.authorizeRequests().antMatchers("/api/auth/**","/api/user/signup", "/api/user/activation/**", 
-        		"/api/user/new-activation/**", "/api/provider/all").permitAll();
+        		"/api/user/new-activation/**", "/api/provider/all", "/api/user/forgot-password/**", "/api/user/**/reset-password").permitAll();
 //        http.authorizeRequests().antMatchers(GET, "/api/provider/**","/api/user/**").hasAnyAuthority("ROLE_PROVIDER", "ROLE_CLIENT");
 //        http.authorizeRequests().antMatchers(POST, "/api/provider/**","/api/user/**").hasAnyAuthority("ROLE_PROVIDER", "ROLE_CLIENT");
 //        http.authorizeRequests().antMatchers(PUT, "/api/provider/**","/api/user/**").hasAnyAuthority("ROLE_PROVIDER", "ROLE_CLIENT");

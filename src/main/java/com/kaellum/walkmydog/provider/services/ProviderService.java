@@ -26,7 +26,7 @@ public interface ProviderService {
 			Optional<Double> price,
 			Optional<List<Integer>> timeRange,
 			Optional<String> province,
-			String city,
+			Optional<String> city,
 			Pageable pageable) throws WalkMyDogException;
 
 }

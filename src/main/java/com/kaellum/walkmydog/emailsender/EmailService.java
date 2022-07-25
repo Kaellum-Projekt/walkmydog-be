@@ -15,7 +15,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 @Component
-@PropertySource("email-messages.properties")
+@PropertySource("classpath:email-messages.properties")
 public class EmailService {
 
     @Value("${activation.email.service.subject}") 

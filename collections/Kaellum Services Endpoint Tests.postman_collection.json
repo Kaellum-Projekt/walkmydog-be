@@ -1,0 +1,907 @@
+{
+	"info": {
+		"_postman_id": "ed3e14c6-449e-4670-b7d0-7a32a53007eb",
+		"name": "Kaellum Services Endpoint Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21183454"
+	},
+	"item": [
+		{
+			"name": "Client",
+			"item": [
+				{
+					"name": "Kaellum Signup",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"password\", Math.random().toString(36).slice(2, 10));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Save response body variables to collections variables\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"    pm.expect(json.id).not.to.equal(null);\r",
+									"    pm.collectionVariables.set(\"id\", json.id);\r",
+									"    pm.collectionVariables.set(\"firstname\", json.firstName);\r",
+									"    pm.collectionVariables.set(\"lastname\", json.lastName);\r",
+									"    pm.collectionVariables.set(\"email\", json.email);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "username",
+								"value": "marcusgeh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "password",
+								"value": "0123xxx",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJSYXBoYWVsIiwicm9sZXMiOlsiUk9MRV9DTElFTlQiXSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2FwaS9hdXRoL2xvZ2luIiwiZXhwIjoxNjU3MjU4ODY2fQ.rm8qXh0B1RJ1RKKweLvHu91m3czDRNV0KL1SYiqK_V4",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\" : \"{{$randomFirstName}}\",\r\n    \"lastName\" : \"{{$randomLastName}}\", \r\n    \"email\" : \"{{$randomEmail}}\",\r\n    \"password\" : \"{{password}}\",\r\n    \"role\" : \"ROLE_CLIENT\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/user/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Activation",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/user/activation/{{email}}/{userTempCode}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"activation",
+								"{{email}}",
+								"{userTempCode}"
+							]
+						},
+						"description": "# **ATTENTION**\n\nIn order to run this request you will need to grab the activation code from the Mongo document 'User', field 'userTempCode' and feed the environment variable 'userTempCode'  \n  \nThis however won't be necessary case you already activated this user through the Activation Email."
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"pm.test(\"Save response body variables to collections variables\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.collectionVariables.set(\"access_token\", json.access_token);\r",
+									"    pm.collectionVariables.set(\"refresh_token\", json.refresh_token);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "username",
+								"value": "marcusgeh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "password",
+								"value": "0123xxx",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8080/api/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Password",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"newpassword\", Math.random().toString(36).slice(2, 10));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"pm.test(\"Save response body variables to collections variables\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.collectionVariables.set(\"password\", pm.collectionVariables.get(\"newpassword\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "username",
+								"value": "marcusgeh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "password",
+								"value": "0123xxx",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"currentPassword\": \"{{password}}\", \r\n    \"newPassword\": \"{{newpassword}}\" \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/user/update-password?userId={{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"update-password"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "{{id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// if(pm.environment.get(\"password\") != \"abc123\"){\r",
+									"//     console.log(\"entou\");\r",
+									"\r",
+									"\r",
+									"// const login={\r",
+									"//         method : 'POST',\r",
+									"//         url : 'localhost:8080/api/auth/login',\r",
+									"//         header: {\r",
+									"//             'Content-Type':'pplication/x-www-form-urlencoded',\r",
+									"//             'Accept-Language':'en'\r",
+									"//         },\r",
+									"//         body:{\r",
+									"//             mode : 'application/json',\r",
+									"//             raw: JSON.stringify(\r",
+									"//                 'username'\r",
+									"//                 )\r",
+									"//         }\r",
+									"//     };   \r",
+									"\r",
+									"// const updatePassReq={\r",
+									"//         method : 'PUT',\r",
+									"//         url : 'localhost:8080/api/user/update-password?userId='+pm.collectionVariables.get(\"id\"),\r",
+									"//         header: {\r",
+									"//             'Content-Type':'application/json',\r",
+									"//             'Accept-Language':'en',\r",
+									"//             'x-auth-token':pm.environment.get('x-auth-token')\r",
+									"//         },\r",
+									"//         body:{\r",
+									"//             mode : 'application/json',\r",
+									"//             raw: JSON.stringify(\r",
+									"//                 {\r",
+									"//                     \"currentPassword\": \"bcd234\", \r",
+									"//                     \"newPassword\": \"abc123\" \r",
+									"//                 })\r",
+									"//         }\r",
+									"//     };   \r",
+									"\r",
+									"\r",
+									"//     pm.sendRequest(updatePassReq, function (err, res1) {\r",
+									"//         pm.expect(res1).to.have.property('code', 200);\r",
+									"//             pm.environment.set(\"password\", \"abc123\");\r",
+									"//      });\r",
+									"// }\r",
+									"\r",
+									"    "
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"pm.test(\"Save response body variables to collections variables\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "username",
+								"value": "marcusgeh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "password",
+								"value": "0123xxx",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/user/deactivate?userId={{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"deactivate"
+							],
+							"query": [
+								{
+									"key": "userId",
+									"value": "{{id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/user/forgot-password/{{email}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"forgot-password",
+								"{{email}}"
+							]
+						},
+						"description": "# **ATTENTION**\n\nIn order to run this request you will need to grab the activation code from the Mongo document 'User', field 'userTempCode' and feed the environment variable 'userTempCode'  \n  \nThis however won't be necessary case you already activated this user through the Activation Email."
+					},
+					"response": []
+				},
+				{
+					"name": "Password Reset",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/user/{forgot-password}/reset-password",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"{forgot-password}",
+								"reset-password"
+							]
+						},
+						"description": "# **ATTENTION**\n\nIn order to run this request you will need to grab the activation code from the Mongo document 'User', field 'userTempCode' and feed the environment variable 'userTempCode'  \n  \nThis however won't be necessary case you already activated this user through the Activation Email."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Provider",
+			"item": [
+				{
+					"name": "Kaellum Signup",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"password\", Math.random().toString(36).slice(2, 10));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Save response body variables to collections variables\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"    pm.expect(json.id).not.to.equal(null);\r",
+									"    pm.collectionVariables.set(\"id\", json.id);\r",
+									"    pm.collectionVariables.set(\"firstname\", json.firstName);\r",
+									"    pm.collectionVariables.set(\"lastname\", json.lastName);\r",
+									"    pm.collectionVariables.set(\"email\", json.email);\r",
+									"    pm.collectionVariables.set(\"profileid\", json.profile.id);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "username",
+								"value": "marcusgeh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "password",
+								"value": "0123xxx",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJSYXBoYWVsIiwicm9sZXMiOlsiUk9MRV9DTElFTlQiXSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2FwaS9hdXRoL2xvZ2luIiwiZXhwIjoxNjU3MjU4ODY2fQ.rm8qXh0B1RJ1RKKweLvHu91m3czDRNV0KL1SYiqK_V4",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstName\" : \"{{$randomFirstName}}\",\r\n    \"lastName\" : \"{{$randomLastName}}\", \r\n    \"email\" : \"{{$randomEmail}}\",\r\n    \"password\" : \"{{password}}\",\r\n    \"role\" : \"ROLE_PROVIDER\",\r\n    \"profile\" : {\r\n        \"dob\" : \"2010-01-12\",\r\n        \"price\" : {{$randomPrice}},\r\n        \"hours\" : [1,2],\r\n        \"days\" : [1,3],\r\n        \"geoLocation\" : \"{{$randomLongitude}}\",\r\n        \"address\" : [\r\n            {\r\n               \"street\": \"{{$randomStreetName}}\",\r\n               \"street2\": \"{{$randomStreetName}}\",\r\n               \"city\": \"{{$randomCity}}\",\r\n               \"province\": \"{{$randomLocale}}\",\r\n               \"country\": \"{{$randomCountry}}\",\r\n               \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n            },\r\n            {\r\n               \"street\": \"{{$randomStreetName}}\",\r\n               \"street2\": \"{{$randomStreetName}}\",\r\n               \"city\": \"{{$randomCity}}\",\r\n               \"province\": \"{{$randomLocale}}\",\r\n               \"country\": \"{{$randomCountry}}\",\r\n               \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n            }\r\n        ]        \r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/user/signup",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"pm.test(\"Save response body variables to collections variables\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.collectionVariables.set(\"accesstokenprovider\", json.access_token);\r",
+									"    pm.collectionVariables.set(\"refreshtoken\", json.refresh_token);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "username",
+								"value": "marcusgeh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "password",
+								"value": "0123xxx",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8080/api/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Providers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accesstokenprovider}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8080/api/provider/all",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"provider",
+								"all"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Provider by Id",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accesstokenprovider}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8080/api/provider/{{profileid}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"provider",
+								"{{profileid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Advanced Search",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accesstokenprovider}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8080/api/provider?city=Maudefurt&price=440.11&page=0&size=10&province=hy",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"provider"
+							],
+							"query": [
+								{
+									"key": "city",
+									"value": "Maudefurt"
+								},
+								{
+									"key": "price",
+									"value": "440.11"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "lastName",
+									"value": "{lname}",
+									"disabled": true
+								},
+								{
+									"key": "province",
+									"value": "hy"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Provider -  NEED FIX",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"password\", Math.random().toString(36).slice(2, 10));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Save response body variables to collections variables\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"    pm.expect(json.id).not.to.equal(null);\r",
+									"    pm.collectionVariables.set(\"id\", json.id);\r",
+									"    pm.collectionVariables.set(\"firstname\", json.firstName);\r",
+									"    pm.collectionVariables.set(\"lastname\", json.lastName);\r",
+									"    pm.collectionVariables.set(\"email\", json.email);\r",
+									"    pm.collectionVariables.set(\"profileid\", json.profile.id);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "username",
+								"value": "marcusgeh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "password",
+								"value": "0123xxx",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{    \r\n    \"dob\" : \"2010-01-12\",\r\n    \"price\" : {{$randomPrice}},\r\n    \"hours\" : [1,2],\r\n    \"days\" : [1,3],\r\n    \"geoLocation\" : \"{{$randomLongitude}}\",\r\n    \"address\" : [\r\n        {\r\n            \"street\": \"{{$randomStreetName}}\",\r\n            \"street2\": \"{{$randomStreetName}}\",\r\n            \"city\": \"{{$randomCity}}\",\r\n            \"province\": \"{{$randomLocale}}\",\r\n            \"country\": \"{{$randomCountry}}\",\r\n            \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n        },\r\n        {\r\n            \"street\": \"{{$randomStreetName}}\",\r\n            \"street2\": \"{{$randomStreetName}}\",\r\n            \"city\": \"{{$randomCity}}\",\r\n            \"province\": \"{{$randomLocale}}\",\r\n            \"country\": \"{{$randomCountry}}\",\r\n            \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n        }\r\n    ]        \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/provider/add",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"provider",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Provider",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Save response body variables to collections variables\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.expect(json.id).not.to.equal(null);\r",
+									"    pm.collectionVariables.set(\"id\", json.id);\r",
+									"    pm.collectionVariables.set(\"firstname\", json.firstName);\r",
+									"    pm.collectionVariables.set(\"lastname\", json.lastName);\r",
+									"    pm.collectionVariables.set(\"email\", json.email);\r",
+									"    pm.collectionVariables.set(\"profileid\", json.profile.id);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "username",
+								"value": "marcusgeh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "password",
+								"value": "0123xxx",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accesstokenprovider}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{    \r\n    \"id\": \"{{profileid}}\",\r\n    \"dob\" : \"2011-09-15\",\r\n    \"price\" : {{$randomPrice}},\r\n    \"hours\" : [2],\r\n    \"days\" : [2,3],\r\n    \"geoLocation\" : \"{{$randomLongitude}}\",\r\n    \"address\" : [\r\n        {\r\n            \"street\": \"{{$randomStreetName}}\",\r\n            \"street2\": \"{{$randomStreetName}}\",\r\n            \"city\": \"{{$randomCity}}\",\r\n            \"province\": \"{{$randomLocale}}\",\r\n            \"country\": \"{{$randomCountry}}\",\r\n            \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n        },\r\n        {\r\n            \"street\": \"{{$randomStreetName}}\",\r\n            \"street2\": \"{{$randomStreetName}}\",\r\n            \"city\": \"{{$randomCity}}\",\r\n            \"province\": \"{{$randomLocale}}\",\r\n            \"country\": \"{{$randomCountry}}\",\r\n            \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n        }\r\n    ]        \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/provider/update",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"provider",
+								"update"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "password",
+			"value": ""
+		},
+		{
+			"key": "firstname",
+			"value": ""
+		},
+		{
+			"key": "lastname",
+			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "access_token",
+			"value": ""
+		},
+		{
+			"key": "refresh_token",
+			"value": ""
+		},
+		{
+			"key": "id",
+			"value": ""
+		},
+		{
+			"key": "profileid",
+			"value": ""
+		},
+		{
+			"key": "accesstokenprovider",
+			"value": ""
+		},
+		{
+			"key": "refreshtoken",
+			"value": ""
+		},
+		{
+			"key": "newpassword",
+			"value": ""
+		}
+	]
+}

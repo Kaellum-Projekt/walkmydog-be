@@ -129,7 +129,7 @@ public class ProviderServiceImpl implements ProviderService{
 
 	@Override
 	public List<ProviderDto> advancedSearch(Optional<String> firstName, Optional<String> lastName,
-			Optional<Double> price, Optional<List<Integer>> timeRange, Optional<String> province, String city,
+			Optional<Double> price, Optional<List<Integer>> timeRange, Optional<String> province, Optional<String> city,
 			Pageable pageable) throws WalkMyDogException {
 		
 		try {
@@ -138,13 +138,14 @@ public class ProviderServiceImpl implements ProviderService{
 			final Query query = new Query().with(pageable);
 			final List<Criteria> criteria = new ArrayList<>();
 			
-			criteria.add(Criteria.where("addresses.city").is(city));
+			if(city.isPresent())
+				criteria.add(Criteria.where("address").elemMatch(Criteria.where("city").is(city.get())));				
 			
-			if(firstName.isPresent())
-				criteria.add(Criteria.where("firstName").is(firstName.get()));
-			
-			if(lastName.isPresent())
-				criteria.add(Criteria.where("lastName").is(lastName.get()));
+//			if(firstName.isPresent())
+//				criteria.add(Criteria.where("firstName").is(firstName.get()));
+//			
+//			if(lastName.isPresent())
+//				criteria.add(Criteria.where("lastName").is(lastName.get()));
 			
 			if(price.isPresent())
 				criteria.add(Criteria.where("price").is(price.get()));
@@ -153,7 +154,7 @@ public class ProviderServiceImpl implements ProviderService{
 				criteria.add(Criteria.where("timeRanges").in(timeRange.get()));
 			
 			if(province.isPresent())
-				criteria.add(Criteria.where("addresses.province").is(province.get()));
+				criteria.add(Criteria.where("address").elemMatch(Criteria.where("province").is(province.get())));	
 				
 			if (!criteria.isEmpty())
 				query.addCriteria(new Criteria().andOperator(criteria.toArray(new Criteria[criteria.size()])));

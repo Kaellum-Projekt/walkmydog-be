@@ -43,9 +43,9 @@ public class UserController {
 	
 	@DeleteMapping("/deactivate")
 	@ResponseStatus(HttpStatus.OK)
-	@PreAuthorize("@userResolverUser.isOwner(#id)")
-	public boolean deactivateUser(@RequestParam String id) {
-		return userService.deactivateUser(id);	
+	@PreAuthorize("@userResolverUser.isOwner(#userId)")
+	public boolean deactivateUser(@RequestParam String userId) {
+		return userService.deactivateUser(userId);	
 	}
 	
 	@GetMapping(value = "/activation/{email}/{activationCode}")
