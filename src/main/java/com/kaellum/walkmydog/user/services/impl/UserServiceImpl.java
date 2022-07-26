@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
 			//First creates a random activation string and sets the user as non-activated
 			String activationCode = generateActivationCode();
 			userDoc.setUserTempCode(activationCode);
-			userDoc.setIsVerified(false);
+			userDoc.setIsVerified(true); //TODO: CHANGE PARAMETER BACK TO FALSE WHEN EMAIL AUTH IS FIXED - WAL-3
 			
 			userRepository.save(userDoc);		
 			
