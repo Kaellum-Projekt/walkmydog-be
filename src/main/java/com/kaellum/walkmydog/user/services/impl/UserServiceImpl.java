@@ -50,6 +50,10 @@ public class UserServiceImpl implements UserService {
 				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
 						"User object must be provided");
 			
+			if(!isPassStrong(user.getPassword()))
+				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
+						"Password is not strong enough");
+			
 			User example = new User();
 			example.setEmail(user.getEmail());			
 			if(userRepository.findOne(Example.of(example)).isPresent())
@@ -124,6 +128,10 @@ public class UserServiceImpl implements UserService {
 					StringUtils.isBlank(userPasswordUpdate.getNewPassword()) ||
 					StringUtils.isBlank(userId))
 				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, "All three parameters are mandatory");
+			
+			if(!isPassStrong(userPasswordUpdate.getNewPassword()))
+				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
+						"Password is not strong enough");
 			
 			Optional<User> userOpt = userRepository.findById(userId);
 			
@@ -243,6 +251,10 @@ public class UserServiceImpl implements UserService {
 			if(StringUtils.isBlank(userPasswordUpdate.getNewPassword()) || StringUtils.isBlank(code))
 				WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, "All parameters are mandatory");
 			
+			if(!isPassStrong(userPasswordUpdate.getNewPassword()))
+				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
+						"Password is not strong enough");
+			
 			Optional<User> userOpt = userRepository.findByUserTempCode(code);
 			
 			if(userOpt.isEmpty()) 
@@ -300,6 +312,18 @@ public class UserServiceImpl implements UserService {
 			return true;
 		return false;
 	}
+	
+	/**
+	 * 8 characters length
+	 * 2 letters in Upper Case
+	 * 1 Special Character (!@#$&*)
+	 * 2 numerals (0-9)
+	 * 3 letters in Lower Case
+	 */
+	private boolean isPassStrong(String password){
+	    return password.matches("^(?=.*[A-Z].*[A-Z])(?=.*[!@#$&*])(?=.*[0-9].*[0-9])(?=.*[a-z].*[a-z].*[a-z]).{8}$");
+
+	  }
 	
 	
 }

@@ -16,7 +16,28 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"pm.collectionVariables.set(\"password\", Math.random().toString(36).slice(2, 10));"
+									"function randomPassword(len = 8, minUpper = 0, minLower = 0, minNumber = -1, minSpecial = -1) {\r",
+									"    let specChars = \"!@#$&*\"; \r",
+									"        chars = specChars[Math.floor(Math.random() * specChars.length)]; \r",
+									"    //String.fromCharCode(...Array(127).keys()).slice(33),//chars\r",
+									"        A2Z = String.fromCharCode(...Array(91).keys()).slice(65),//A-Z\r",
+									"        a2z = String.fromCharCode(...Array(123).keys()).slice(97),//a-z\r",
+									"        zero2nine = String.fromCharCode(...Array(58).keys()).slice(48),//0-9\r",
+									"        specials = chars.replace(/\\w/g, '')\r",
+									"    if (minSpecial < 0) chars = zero2nine + A2Z + a2z\r",
+									"    if (minNumber < 0) chars = chars.replace(zero2nine, '')\r",
+									"    let minRequired = minSpecial + minUpper + minLower + minNumber\r",
+									"    let rs = [].concat(\r",
+									"        Array.from({length: minSpecial ? minSpecial : 0}, () => specials[Math.floor(Math.random() * specials.length)]),\r",
+									"        Array.from({length: minUpper ? minUpper : 0}, () => A2Z[Math.floor(Math.random() * A2Z.length)]),\r",
+									"        Array.from({length: minLower ? minLower : 0}, () => a2z[Math.floor(Math.random() * a2z.length)]),\r",
+									"        Array.from({length: minNumber ? minNumber : 0}, () => zero2nine[Math.floor(Math.random() * zero2nine.length)]),\r",
+									"        Array.from({length: Math.max(len, minRequired) - (minRequired ? minRequired : 0)}, () => chars[Math.floor(Math.random() * chars.length)]),\r",
+									"    )\r",
+									"    return rs.sort(() => Math.random() > Math.random()).join('')\r",
+									"}\r",
+									"\r",
+									"pm.collectionVariables.set(\"password\", randomPassword(8, 2, 3, 2, 0));"
 								],
 								"type": "text/javascript"
 							}
@@ -508,7 +529,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstName\" : \"{{$randomFirstName}}\",\r\n    \"lastName\" : \"{{$randomLastName}}\", \r\n    \"email\" : \"{{$randomEmail}}\",\r\n    \"password\" : \"{{password}}\",\r\n    \"role\" : \"ROLE_PROVIDER\",\r\n    \"profile\" : {\r\n        \"dob\" : \"2010-01-12\",\r\n        \"price\" : {{$randomPrice}},\r\n        \"hours\" : [1,2],\r\n        \"days\" : [1,3],\r\n        \"geoLocation\" : \"{{$randomLongitude}}\",\r\n        \"address\" : [\r\n            {\r\n               \"street\": \"{{$randomStreetName}}\",\r\n               \"street2\": \"{{$randomStreetName}}\",\r\n               \"city\": \"{{$randomCity}}\",\r\n               \"province\": \"{{$randomLocale}}\",\r\n               \"country\": \"{{$randomCountry}}\",\r\n               \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n            },\r\n            {\r\n               \"street\": \"{{$randomStreetName}}\",\r\n               \"street2\": \"{{$randomStreetName}}\",\r\n               \"city\": \"{{$randomCity}}\",\r\n               \"province\": \"{{$randomLocale}}\",\r\n               \"country\": \"{{$randomCountry}}\",\r\n               \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n            }\r\n        ]        \r\n    }\r\n}",
+							"raw": "{\r\n    \"firstName\" : \"{{$randomFirstName}}\",\r\n    \"lastName\" : \"{{$randomLastName}}\", \r\n    \"email\" : \"{{$randomEmail}}\",\r\n    \"password\" : \"{{password}}\",\r\n    \"phone\" : \"{{$randomPhoneNumber}}\",\r\n    \"role\" : \"ROLE_PROVIDER\",\r\n    \"profile\" : {\r\n        \"dob\" : \"2010-01-12\",\r\n        \"price\" : {{$randomPrice}},\r\n        \"hours\" : [1,2],\r\n        \"days\" : [1,3],\r\n        \"geoLocation\" : \"{{$randomLongitude}}\",\r\n        \"address\" : [\r\n            {\r\n               \"street\": \"{{$randomStreetName}}\",\r\n               \"street2\": \"{{$randomStreetName}}\",\r\n               \"city\": \"{{$randomCity}}\",\r\n               \"province\": \"{{$randomLocale}}\",\r\n               \"country\": \"{{$randomCountry}}\",\r\n               \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n            },\r\n            {\r\n               \"street\": \"{{$randomStreetName}}\",\r\n               \"street2\": \"{{$randomStreetName}}\",\r\n               \"city\": \"{{$randomCity}}\",\r\n               \"province\": \"{{$randomLocale}}\",\r\n               \"country\": \"{{$randomCountry}}\",\r\n               \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n            }\r\n        ]        \r\n    }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
