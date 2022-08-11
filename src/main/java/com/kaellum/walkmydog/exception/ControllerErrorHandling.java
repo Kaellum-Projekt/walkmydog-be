@@ -18,6 +18,21 @@ import com.kaellum.walkmydog.exception.enums.WalkMyDogExReasons;
 @RestControllerAdvice
 public class ControllerErrorHandling {
 	
+	
+	@ExceptionHandler(ConflictWalkMyDogException.class)
+	@ResponseStatus(HttpStatus.CONFLICT)
+	public WalkMyDogExceptionResponseDto controllerConflictErrorHandling (ConflictWalkMyDogException ce) {
+		WalkMyDogException e = ce.getWalkMyDogException();
+		return WalkMyDogExceptionResponseDto.builder()
+				.code(e.getCode())
+				.errorMessage(e.getErrorMessage())
+				.systemErrorMessage(e.getSystemErrorMessage())
+				.frontendHandling(e.getFrontendHandling() != null ? e.getFrontendHandling().getCode() : WalkMyDogExFrontendHandling.NONE.getCode())
+				.exceptionReason(e.getExceptionReason() != null ? e.getExceptionReason().getCode() : WalkMyDogExReasons.NONE.getCode())
+				.apiType(e.getApiType() != null ? e.getApiType().getCode() : WalkMyDogExApiTypes.NONE.getCode())
+				.build();
+	}
+	
 	@ExceptionHandler(WalkMyDogException.class)
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public WalkMyDogExceptionResponseDto controllerErrorHandling (WalkMyDogException e) {
@@ -30,6 +45,8 @@ public class ControllerErrorHandling {
 				.apiType(e.getApiType() != null ? e.getApiType().getCode() : WalkMyDogExApiTypes.NONE.getCode())
 				.build();
 	}
+	
+
 	
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)

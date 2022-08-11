@@ -18,11 +18,10 @@ import com.kaellum.walkmydog.emailsender.EmailSenderEventPublisher;
 import com.kaellum.walkmydog.emailsender.EmailType;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
-import com.kaellum.walkmydog.provider.dtos.ProviderDto;
 import com.kaellum.walkmydog.provider.services.ProviderService;
 import com.kaellum.walkmydog.user.collections.User;
+import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
-import com.kaellum.walkmydog.user.dto.UserProfileDto;
 import com.kaellum.walkmydog.user.repositories.UserRepository;
 import com.kaellum.walkmydog.user.services.UserService;
 
@@ -42,36 +41,36 @@ public class UserServiceImpl implements UserService {
     public static String USERNAME;
 
 	@Override
-	public UserProfileDto addNewUser(UserProfileDto user) throws WalkMyDogException {
-		log.info("New User Dto {}", user);
-		UserProfileDto dtoReturn = null;
+	public UserDto addNewUser(UserDto userDto) throws WalkMyDogException {
+		log.info("New User Dto {}", userDto);
+		UserDto dtoReturn = null;
 		try {
-			if(user == null)
+			if(userDto == null)
 				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
 						"User object must be provided");
 			
-			if(!isPassStrong(user.getPassword()))
+			if(!isPassStrong(userDto.getPassword()))
 				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
 						"Password is not strong enough");
 			
 			User example = new User();
-			example.setEmail(user.getEmail());			
+			example.setEmail(userDto.getEmail());			
 			if(userRepository.findOne(Example.of(example)).isPresent())
 				throw WalkMyDogException.buildWarningDuplicate(CREATE_API, "The email address is already in use");
 
-			User userDoc = modelMapper.map(user, User.class);
-			String password = passwordEncoder.encode(user.getPassword());
+			User userDoc = modelMapper.map(userDto, User.class);
+			String password = passwordEncoder.encode(userDto.getPassword());
 			userDoc.setPassword(password);
-			USERNAME = user.getEmail();
+			USERNAME = userDto.getEmail();
 			
-			ProviderDto provider = null;
-			if(user.getRole().equals("ROLE_PROVIDER")) {
-				if(user.getProviderDto() == null)
+			//ProviderDto provider = null;
+			if(userDto.getRole().equals("ROLE_PROVIDER")) {
+				if(userDto.getProviderDto() == null)
 					throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
 							"Provider object must be provided");
-				ProviderDto providerDto = user.getProviderDto();
-				provider = providerService.addProvider(providerDto, user.getEmail());
-				userDoc.setProviderId(provider.getId());
+//				ProviderDto providerDto = user.getProviderDto();
+//				provider = providerService.addProvider(providerDto, user.getEmail());
+//				userDoc.setProviderId(provider.getId());
 			}
 			
 			//First creates a random activation string and sets the user as non-activated
@@ -81,11 +80,11 @@ public class UserServiceImpl implements UserService {
 			
 			userRepository.save(userDoc);		
 			
-			dtoReturn = modelMapper.map(userDoc, UserProfileDto.class);
-			dtoReturn.setProviderDto(provider);
+			dtoReturn = modelMapper.map(userDoc, UserDto.class);
+			//dtoReturn.setProviderDto(provider);
 			
 			//Send email for activation
-		    EmailDetailsDtos emDtos = new EmailDetailsDtos(user.getFirstName(), user.getEmail(), activationCode, EmailType.ACTIVATION);
+		    EmailDetailsDtos emDtos = new EmailDetailsDtos(userDto.getFirstName(), userDto.getEmail(), activationCode, EmailType.ACTIVATION);
 			emailSenderEventPublisher.publishEmailSenderEvent(emDtos);
 			
 		} catch (WalkMyDogException we) {

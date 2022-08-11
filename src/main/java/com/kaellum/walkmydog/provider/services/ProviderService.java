@@ -12,7 +12,7 @@ public interface ProviderService {
 	
 	ProviderDto addProvider (ProviderDto dto, String email);
 	
-	List<ProviderDto> getAllProviders (Pageable page);
+//	List<ProviderDto> getAllProviders (Pageable page);
 	
 	ProviderDto getProviderById (String id) throws WalkMyDogException;
 	

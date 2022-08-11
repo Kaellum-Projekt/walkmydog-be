@@ -1,5 +1,7 @@
 package com.kaellum.walkmydog.provider.dtos;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,4 +18,8 @@ public class AddressDto{
 	private String province;
 	private String country;
 	private String postalCode;
+	private String createdBy;
+    private LocalDateTime createdDate;
+    private String lastModifiedBy;
+    private LocalDateTime lastModifiedDate;
 }

@@ -30,11 +30,11 @@ public class ProviderController {
 	
 	private final ProviderService providerService;
 	
-	@GetMapping("/all")
-	@ResponseStatus(HttpStatus.OK)
-	public List<ProviderDto> getAllProvider (@PageableDefault Pageable pageable){
-		return providerService.getAllProviders(pageable);
-	}
+//	@GetMapping("/all")
+//	@ResponseStatus(HttpStatus.OK)
+//	public List<ProviderDto> getAllProvider (@PageableDefault Pageable pageable){
+//		return providerService.getAllProviders(pageable);
+//	}
 	
 	@GetMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)

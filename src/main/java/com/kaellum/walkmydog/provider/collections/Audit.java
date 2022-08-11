@@ -14,10 +14,11 @@ import lombok.Data;
 
 /**
  * @author Raphael Cremasco
+ * @param <T>
  *
  */
 @Data
-public abstract class Audit implements Persistable<String> {
+public abstract class Audit<T> implements Persistable<T> {
 
 	@CreatedBy    
 	private String createdBy;

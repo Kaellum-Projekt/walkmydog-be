@@ -42,12 +42,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(STATELESS);
         http.authorizeRequests().antMatchers("/api/auth/**","/api/user/signup", "/api/user/activation/**", 
-        		"/api/user/new-activation/**", "/api/provider/all", "/api/user/forgot-password/**", "/api/user/**/reset-password").permitAll();
+        		"/api/user/new-activation/**", "/api/provider/**", "/api/user/forgot-password/**", "/api/user/**/reset-password").permitAll();
 //        http.authorizeRequests().antMatchers(GET, "/api/provider/**","/api/user/**").hasAnyAuthority("ROLE_PROVIDER", "ROLE_CLIENT");
 //        http.authorizeRequests().antMatchers(POST, "/api/provider/**","/api/user/**").hasAnyAuthority("ROLE_PROVIDER", "ROLE_CLIENT");
 //        http.authorizeRequests().antMatchers(PUT, "/api/provider/**","/api/user/**").hasAnyAuthority("ROLE_PROVIDER", "ROLE_CLIENT");
 //        http.authorizeRequests().antMatchers(DELETE, "/api/provider/**","/api/user/**").hasAnyAuthority("ROLE_PROVIDER", "ROLE_CLIENT");
-        http.authorizeRequests().antMatchers("/api/provider/**").hasAnyAuthority("ROLE_PROVIDER");
+        http.authorizeRequests().antMatchers("/api/provider/add", "/api/provider/update").hasAnyAuthority("ROLE_PROVIDER");
         http.authorizeRequests().antMatchers("/api/user/**").hasAnyAuthority("ROLE_CLIENT");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(customAuthenticationFilter);

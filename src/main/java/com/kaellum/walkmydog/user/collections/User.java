@@ -7,18 +7,21 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.kaellum.walkmydog.provider.collections.Audit;
+import com.kaellum.walkmydog.provider.collections.Provider;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Document
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class User extends Audit{	
+public class User extends Audit<String>{	
 	@Id
 	private String id;
 	private String email;
@@ -29,8 +32,10 @@ public class User extends Audit{
 	private String role;
 	private Boolean isVerified;
 	private String userTempCode;
-	private String providerId;
+//	private String providerId;
 	private LocalDateTime deactivationDate;
+	private Provider providerDto;
+	
 	
 	@Override	
 	public boolean isNew() {

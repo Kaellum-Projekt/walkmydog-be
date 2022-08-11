@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class Ratings extends Audit{
+public class Ratings extends Audit<String>{
 	
 	@Id
 	private String id;

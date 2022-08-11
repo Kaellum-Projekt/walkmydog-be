@@ -11,7 +11,6 @@ import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -58,20 +57,20 @@ public class ProviderServiceImpl implements ProviderService{
 		return resp;
 	}
 
-	@Override
-	public List<ProviderDto> getAllProviders(Pageable page) {
-		
-		List<ProviderDto> resp = null;
-		try {		
-			Page<Provider> entities = providerRepository.findAllActiveProviders(page);
-			
-			resp = modelMapper.map(entities.getContent(), new TypeToken<List<ProviderDto>>() {}.getType());
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			throw WalkMyDogException.buildCriticalRuntime(READ_API, e);
-		}		
-		return resp;
-	}
+//	@Override
+//	public List<ProviderDto> getAllProviders(Pageable page) {
+//		
+//		List<ProviderDto> resp = null;
+//		try {		
+//			Page<Provider> entities = providerRepository.findAllActiveProviders(page);
+//			
+//			resp = modelMapper.map(entities.getContent(), new TypeToken<List<ProviderDto>>() {}.getType());
+//		} catch (Exception e) {
+//			log.error(e.getMessage(), e);
+//			throw WalkMyDogException.buildCriticalRuntime(READ_API, e);
+//		}		
+//		return resp;
+//	}
 
 	@Override
 	public ProviderDto getProviderById(String id) throws WalkMyDogException {

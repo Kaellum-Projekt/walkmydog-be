@@ -15,8 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kaellum.walkmydog.exception.ConflictWalkMyDogException;
+import com.kaellum.walkmydog.exception.WalkMyDogException;
+import com.kaellum.walkmydog.exception.enums.WalkMyDogExReasons;
+import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
-import com.kaellum.walkmydog.user.dto.UserProfileDto;
 import com.kaellum.walkmydog.user.services.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,8 +33,17 @@ public class UserController {
 	
 	@PostMapping("/signup")
 	@ResponseStatus(HttpStatus.CREATED)
-	public UserProfileDto createNewUser(@Valid @RequestBody UserProfileDto userProfile) {
-		return userService.addNewUser(userProfile);	
+	public UserDto createNewUser(@Valid @RequestBody UserDto userDto) {
+		try {
+			return userService.addNewUser(userDto);	
+		} catch (WalkMyDogException e) {
+			if(e.getExceptionReason().equals(WalkMyDogExReasons.DUPLICATE_RESOURCE)) {
+				throw new ConflictWalkMyDogException(e);
+			}else {
+				throw e;
+			}
+		}
+		
 	}
 	
 	@PutMapping("/update-password")
