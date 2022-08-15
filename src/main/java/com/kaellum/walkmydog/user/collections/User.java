@@ -4,6 +4,7 @@ package com.kaellum.walkmydog.user.collections;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.kaellum.walkmydog.provider.collections.Audit;
@@ -32,9 +33,8 @@ public class User extends Audit<String>{
 	private String role;
 	private Boolean isVerified;
 	private String userTempCode;
-//	private String providerId;
 	private LocalDateTime deactivationDate;
-	private Provider providerDto;
+	private Provider provider;
 	
 	
 	@Override	

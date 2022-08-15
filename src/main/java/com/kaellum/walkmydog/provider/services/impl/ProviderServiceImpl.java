@@ -8,6 +8,7 @@ import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.UPDATE_A
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -22,6 +23,8 @@ import com.kaellum.walkmydog.provider.collections.Provider;
 import com.kaellum.walkmydog.provider.collections.repository.ProviderRepository;
 import com.kaellum.walkmydog.provider.dtos.ProviderDto;
 import com.kaellum.walkmydog.provider.services.ProviderService;
+import com.kaellum.walkmydog.user.collections.User;
+import com.kaellum.walkmydog.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -33,6 +36,7 @@ public class ProviderServiceImpl implements ProviderService{
 
 	private final ModelMapper modelMapper;
 	private final ProviderRepository providerRepository;
+	private final UserRepository userRepository;
 	private final MongoTemplate mongoTemplate;
 	
 		
@@ -80,9 +84,9 @@ public class ProviderServiceImpl implements ProviderService{
 		ProviderDto resp = null;
 		try {
 			
-			Provider dto = providerRepository.findById(id)
+			Provider dto = userRepository.findByProviderId(id)
 					.orElseThrow(() -> WalkMyDogException.buildWarningNotFound(READ_API, String.format("Provider %s not found", id)));
-			
+
 			resp = modelMapper.map(dto, ProviderDto.class);
 		} catch (WalkMyDogException e) {
 			log.error(e.getErrorMessage(), e);
@@ -138,7 +142,7 @@ public class ProviderServiceImpl implements ProviderService{
 			final List<Criteria> criteria = new ArrayList<>();
 			
 			if(city.isPresent())
-				criteria.add(Criteria.where("address").elemMatch(Criteria.where("city").is(city.get())));				
+				criteria.add(Criteria.where("provider.addresses").elemMatch(Criteria.where("city").is(city.get())));				
 			
 //			if(firstName.isPresent())
 //				criteria.add(Criteria.where("firstName").is(firstName.get()));
@@ -147,18 +151,18 @@ public class ProviderServiceImpl implements ProviderService{
 //				criteria.add(Criteria.where("lastName").is(lastName.get()));
 			
 			if(price.isPresent())
-				criteria.add(Criteria.where("price").is(price.get()));
+				criteria.add(Criteria.where("provider.price").is(price.get()));
 			
 			if(timeRange.isPresent())
-				criteria.add(Criteria.where("timeRanges").in(timeRange.get()));
+				criteria.add(Criteria.where("provider.timeRanges").in(timeRange.get()));
 			
 			if(province.isPresent())
-				criteria.add(Criteria.where("address").elemMatch(Criteria.where("province").is(province.get())));	
+				criteria.add(Criteria.where("provider.addresses").elemMatch(Criteria.where("province").is(province.get())));	
 				
 			if (!criteria.isEmpty())
 				query.addCriteria(new Criteria().andOperator(criteria.toArray(new Criteria[criteria.size()])));
 			
-			dtoReturn = mongoTemplate.find(query, Provider.class);	
+			dtoReturn = mongoTemplate.find(query, User.class).stream().map(User::getProvider).collect(Collectors.toList());	
 			
 			return modelMapper.map(dtoReturn, new TypeToken<List<ProviderDto>>() {}.getType());
 

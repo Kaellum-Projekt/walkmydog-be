@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.kaellum.walkmydog.user.mappers.UserDtoToUser;
+import com.kaellum.walkmydog.user.mappers.UserToUserDto;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -33,6 +34,7 @@ public class ModelMapperConfig {
 				
 		log.info("==> modelMapper :{}", modelMapper);
 		
+		modelMapper.addMappings(new UserToUserDto());
 		modelMapper.addMappings(new UserDtoToUser());
 		
 		return modelMapper;		

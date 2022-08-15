@@ -6,11 +6,11 @@ import com.kaellum.walkmydog.user.collections.User;
 import com.kaellum.walkmydog.user.dto.UserDto;
 
 
-public class UserDtoToUser extends PropertyMap<User, UserDto>{
+public class UserToUserDto extends PropertyMap<UserDto, User>{
 
 	@Override
 	protected void configure() {
-		map(source.getProvider(), destination.getProviderDto());		
+		map(source.getProviderDto(), destination.getProvider());		
 	}
 
 }
