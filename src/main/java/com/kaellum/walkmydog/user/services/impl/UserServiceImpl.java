@@ -33,7 +33,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final ProviderService providerService;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private final EmailSenderEventPublisher emailSenderEventPublisher;
@@ -64,13 +63,10 @@ public class UserServiceImpl implements UserService {
 			USERNAME = userDto.getEmail();
 			
 			//ProviderDto provider = null;
-			if(userDto.getRole().equals("ROLE_PROVIDER")) {
+			if(userDto.getProviderDto().getRole().equals("ROLE_PROVIDER")) {
 				if(userDto.getProviderDto() == null)
 					throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
 							"Provider object must be provided");
-//				ProviderDto providerDto = user.getProviderDto();
-//				provider = providerService.addProvider(providerDto, user.getEmail());
-//				userDoc.setProviderId(provider.getId());
 			}
 			
 			//First creates a random activation string and sets the user as non-activated
@@ -81,10 +77,9 @@ public class UserServiceImpl implements UserService {
 			userRepository.save(userDoc);		
 			
 			dtoReturn = modelMapper.map(userDoc, UserDto.class);
-			//dtoReturn.setProviderDto(provider);
 			
 			//Send email for activation
-		    EmailDetailsDtos emDtos = new EmailDetailsDtos(userDto.getFirstName(), userDto.getEmail(), activationCode, EmailType.ACTIVATION);
+		    EmailDetailsDtos emDtos = new EmailDetailsDtos(userDto.getProviderDto().getFirstName(), userDto.getEmail(), activationCode, EmailType.ACTIVATION);
 			emailSenderEventPublisher.publishEmailSenderEvent(emDtos);
 			
 		} catch (WalkMyDogException we) {
@@ -140,7 +135,6 @@ public class UserServiceImpl implements UserService {
 			User user = userOpt.get();
 			
 			//Validates current password
-
 			if(!passwordEncoder.matches(userPasswordUpdate.getCurrentPassword(), user.getPassword()))
 				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.UPDATE_API, 
 						"Current Password is not Valid.<br>Please, Try it again!");
@@ -205,7 +199,7 @@ public class UserServiceImpl implements UserService {
 			
 			userRepository.save(user);
 			
-			EmailDetailsDtos emDtos = new EmailDetailsDtos(user.getFirstName(), user.getEmail(), activationCode, EmailType.ACTIVATION);
+			EmailDetailsDtos emDtos = new EmailDetailsDtos(user.getProvider().getFirstName(), user.getEmail(), activationCode, EmailType.ACTIVATION);
 			emailSenderEventPublisher.publishEmailSenderEvent(emDtos);
 		} catch (WalkMyDogException we) {
 			log.error(we.getErrorMessage(), we);
@@ -233,7 +227,7 @@ public class UserServiceImpl implements UserService {
 			
 			userRepository.save(user);
 			
-			EmailDetailsDtos emDtos = new EmailDetailsDtos(user.getFirstName(), user.getEmail(), newCode, EmailType.RESETPASS);
+			EmailDetailsDtos emDtos = new EmailDetailsDtos(user.getProvider().getFirstName(), user.getEmail(), newCode, EmailType.RESETPASS);
 			emailSenderEventPublisher.publishEmailSenderEvent(emDtos);
 		} catch (WalkMyDogException we) {
 			log.error(we.getErrorMessage(), we);
@@ -313,16 +307,21 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	/**
-	 * 8 characters length
-	 * 2 letters in Upper Case
+	 * 6 characters length
+	 * 1 letters in Upper Case
 	 * 1 Special Character (!@#$&*)
-	 * 2 numerals (0-9)
-	 * 3 letters in Lower Case
+	 * 1 numerals (0-9)
+	 * 1 letters in Lower Case
 	 */
 	private boolean isPassStrong(String password){
-	    return password.matches("^(?=.*[A-Z].*[A-Z])(?=.*[!@#$&*])(?=.*[0-9].*[0-9])(?=.*[a-z].*[a-z].*[a-z]).{8}$");
+	    return password.matches("^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{6,}$");
 
 	  }
+
+	@Override
+	public UserDto getUserByEmail(String email) {
+		return modelMapper.map(userRepository.findUserByEmail(email), UserDto.class);
+	}
 	
 	
 }

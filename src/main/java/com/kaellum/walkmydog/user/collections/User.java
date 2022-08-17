@@ -26,11 +26,8 @@ public class User extends Audit<String>{
 	@Id
 	private String id;
 	private String email;
-	private String firstName;
-	private String lastName;
 	private String salt;
 	private String password;
-	private String role;
 	private Boolean isVerified;
 	private String userTempCode;
 	private LocalDateTime deactivationDate;

@@ -34,8 +34,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kaellum.walkmydog.authentication.services.TokenService;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
-import com.kaellum.walkmydog.user.collections.User;
-import com.kaellum.walkmydog.user.repositories.UserRepository;
+import com.kaellum.walkmydog.user.dto.UserDto;
+import com.kaellum.walkmydog.user.services.UserService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -45,7 +45,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Transactional
 public class TokenServiceImpl implements TokenService, UserDetailsService {
-    private final UserRepository userRepository;
+    private final UserService userService;
 
 	@Override
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException, WalkMyDogException {
@@ -57,12 +57,16 @@ public class TokenServiceImpl implements TokenService, UserDetailsService {
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(refresh_token);
                 String username = decodedJWT.getSubject();
-                User user = userRepository.findUserByEmailAndVerified(username).get();
+                UserDto userDto = userService.getUserByEmail(username);
                 String access_token = JWT.create()
-                        .withSubject(user.getEmail())
-                        .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 1000))
+                        .withSubject(userDto.getEmail())
+                        .withClaim("firstName" , userDto.getProviderDto().getFirstName())
+                        .withClaim("lastName" , userDto.getProviderDto().getLastName())
+                        .withClaim("id", userDto.getId())
+                        .withClaim("isVerified", userDto.getIsVerified())
+                        .withExpiresAt(new Date(System.currentTimeMillis() + 6000 * 60 * 1000))
                         .withIssuer(request.getRequestURL().toString())
-                        .withArrayClaim("roles", new String[]{user.getRole()})
+                        .withClaim("roles", userDto.getProviderDto().getRole())
                         .sign(algorithm);
                 Map<String, String> tokens = new HashMap<>();
                 tokens.put("access_token", access_token);
@@ -90,21 +94,21 @@ public class TokenServiceImpl implements TokenService, UserDetailsService {
 	
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findUserByEmail(username);
-        if(user == null) {
+        UserDto userDto = userService.getUserByEmail(username);
+        if(userDto == null) {
             log.error("User {} not found in the database", username);
           throw new UsernameNotFoundException("User "+ username +" not found in the database");
-        }else if (user != null && !user.getIsVerified()){
+        }else if (userDto != null && !userDto.getIsVerified()){
         	log.error("User {} found in the database, however not activated", username);
             throw new UsernameNotFoundException("User "+ username +" not activated yet");
-        }else if (user != null && user.getDeactivationDate() != null){
+        }else if (userDto != null && userDto.getDeactivationDate() != null){
         	log.error("User {} found in the database, however it is deactivated", username);
             throw new UsernameNotFoundException("User "+ username +" is currently deactivated");            
         } else {
             log.info("User found in the database: {}", username);
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority(user.getRole()));
-            return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), authorities);
+            authorities.add(new SimpleGrantedAuthority(userDto.getProviderDto().getRole()));
+            return new org.springframework.security.core.userdetails.User(userDto.getEmail(), userDto.getPassword(), authorities);
         }
     }
     

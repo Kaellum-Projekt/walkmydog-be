@@ -24,6 +24,8 @@ import lombok.Setter;
 public class Provider extends Audit<ObjectId>{
 	
 	private ObjectId id = new ObjectId();
+	private String firstName;
+	private String lastName;
 	private LocalDate dob;
 	private String phone;
 	private Double price;
@@ -34,6 +36,7 @@ public class Provider extends Audit<ObjectId>{
 	private String userId;
 	private LocalDateTime deactivationDate;
 	private Set<Reviews> ratings;
+	private String role;
 
 	@Override
 	public boolean isNew() {

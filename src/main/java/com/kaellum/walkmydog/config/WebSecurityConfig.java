@@ -18,6 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.kaellum.walkmydog.config.securityfilter.CustomAuthenticationFilter;
 import com.kaellum.walkmydog.config.securityfilter.CustomAuthorizationFilter;
+import com.kaellum.walkmydog.user.services.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +29,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 	
 	private final UserDetailsService userDetailsService;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
+	private final UserService userService;
 	
 	@Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -37,7 +39,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 	@Override
     protected void configure(HttpSecurity http) throws Exception 
     {
-        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean());
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean(), userService);
         customAuthenticationFilter.setFilterProcessesUrl("/api/auth/login");
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(STATELESS);

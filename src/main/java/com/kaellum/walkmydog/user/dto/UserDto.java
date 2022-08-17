@@ -18,17 +18,13 @@ import lombok.RequiredArgsConstructor;
 public class UserDto {
 	
 	private String id;
-	@NotNull @NotEmpty
-	private String firstName;
-	@NotNull @NotEmpty
-	private String lastName;
 	@NotNull @NotEmpty @Email
 	private String email;
 	@NotNull @NotEmpty
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
-	@NotNull @NotEmpty
-	private String role;
+	private Boolean isVerified;
+	private LocalDateTime deactivationDate;
 	@JsonProperty(value = "profile")
 	@Valid
 	private ProviderDto providerDto;
@@ -36,6 +32,5 @@ public class UserDto {
     private LocalDateTime createdDate;
     private String lastModifiedBy;
     private LocalDateTime lastModifiedDate;
-
 
 }

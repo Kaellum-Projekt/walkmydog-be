@@ -13,6 +13,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,20 +30,21 @@ import com.kaellum.walkmydog.exception.dto.WalkMyDogExceptionResponseDto;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExFrontendHandling;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExReasons;
+import com.kaellum.walkmydog.user.dto.UserDto;
+import com.kaellum.walkmydog.user.services.UserService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 /**
  * @author Raphael Cremasco
  */
 @Log4j2
+@RequiredArgsConstructor
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
     
-    public CustomAuthenticationFilter(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
-
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         String username = request.getParameter("username");
@@ -55,17 +57,27 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
     	User user = (User)authentication.getPrincipal();
-		Algorithm algorithm = Algorithm.HMAC256(System.getenv("WMD_SECRET_KEY").getBytes());
+		UserDto userDto = userService.getUserByEmail(user.getUsername());
+    	Algorithm algorithm = Algorithm.HMAC256(System.getenv("WMD_SECRET_KEY").getBytes());
         String access_token = JWT.create()
                 .withSubject(user.getUsername())
+                .withClaim("firstName" , userDto.getProviderDto().getFirstName())
+                .withClaim("lastName" , userDto.getProviderDto().getLastName())
+                .withClaim("id", userDto.getId())
+                .withClaim("isVerified", userDto.getIsVerified())
                 .withExpiresAt(new Date(System.currentTimeMillis() + 60 * 60 * 1000))
                 .withIssuer(request.getRequestURL().toString())
                 .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .sign(algorithm);
         String refresh_token = JWT.create()
                 .withSubject(user.getUsername())
+                .withClaim("firstName" , userDto.getProviderDto().getFirstName())
+                .withClaim("lastName" , userDto.getProviderDto().getLastName())
+                .withClaim("id", userDto.getId())
+                .withClaim("isVerified", userDto.getIsVerified())
                 .withExpiresAt(new Date(System.currentTimeMillis() + 6000 * 60 * 1000))
                 .withIssuer(request.getRequestURL().toString())
+                .withClaim("roles", user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .sign(algorithm);
         /*response.setHeader("access_token", access_token);
         response.setHeader("refresh_token", refresh_token);*/

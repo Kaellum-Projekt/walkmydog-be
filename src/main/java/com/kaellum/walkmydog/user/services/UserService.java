@@ -14,4 +14,5 @@ public interface UserService {
 	boolean resendActivationCode(String email) throws WalkMyDogException;
 	void resetForgotPassword(String email) throws WalkMyDogException;
 	Boolean passwordReset(UserPasswordUpdate userPasswordUpdate, String code) throws WalkMyDogException;
+	UserDto getUserByEmail(String email);
 }

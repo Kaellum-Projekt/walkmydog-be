@@ -10,7 +10,7 @@ public class UserDtoToUser extends PropertyMap<User, UserDto>{
 
 	@Override
 	protected void configure() {
-		map(source.getProvider(), destination.getProviderDto());		
+		map(source.getProvider(), destination.getProviderDto());
 	}
 
 }
