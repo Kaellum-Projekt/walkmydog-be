@@ -8,6 +8,7 @@ import com.kaellum.walkmydog.user.dto.UserDto;
 
 public interface UserService {
 	UserDto addNewUser(UserDto userDto) throws WalkMyDogException;
+	UserDto updateUser (UserDto userDto) throws WalkMyDogException;
     Boolean passwordUpdate(UserPasswordUpdate userPasswordUpdate, String userId) throws WalkMyDogException;
     Boolean deactivateUser (String id) throws WalkMyDogException;
 	boolean activateUser(String email, String activationCode)  throws WalkMyDogException;

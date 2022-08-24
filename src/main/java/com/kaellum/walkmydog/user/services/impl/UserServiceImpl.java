@@ -4,12 +4,16 @@ import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.CREATE_A
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Example;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +22,6 @@ import com.kaellum.walkmydog.emailsender.EmailSenderEventPublisher;
 import com.kaellum.walkmydog.emailsender.EmailType;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
-import com.kaellum.walkmydog.provider.services.ProviderService;
 import com.kaellum.walkmydog.user.collections.User;
 import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
@@ -36,6 +39,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private final EmailSenderEventPublisher emailSenderEventPublisher;
+    private final MongoTemplate mongoTemplate;
     
     public static String USERNAME;
 
@@ -63,16 +67,14 @@ public class UserServiceImpl implements UserService {
 			USERNAME = userDto.getEmail();
 			
 			//ProviderDto provider = null;
-			if(userDto.getProviderDto().getRole().equals("ROLE_PROVIDER")) {
-				if(userDto.getProviderDto() == null)
-					throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
-							"Provider object must be provided");
-			}
+			if(!userDto.getProviderDto().getRole().equals("ROLE_PROVIDER") && !userDto.getProviderDto().getRole().equals("ROLE_CLIENT") )
+				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
+						"Not valid Role");
 			
 			//First creates a random activation string and sets the user as non-activated
 			String activationCode = generateActivationCode();
 			userDoc.setUserTempCode(activationCode);
-			userDoc.setIsVerified(true); //TODO: CHANGE PARAMETER BACK TO FALSE WHEN EMAIL AUTH IS FIXED - WAL-3
+			userDoc.setIsVerified(false); 
 			
 			userRepository.save(userDoc);		
 			
@@ -90,6 +92,36 @@ public class UserServiceImpl implements UserService {
 			throw WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
 		}
 		return dtoReturn;
+	}
+	
+	//https://stackoverflow.com/questions/41377883/how-to-perform-partial-update-with-spring-data-mongodbmongooperations
+	//https://stackoverflow.com/questions/20355261/how-to-deserialize-json-into-flat-map-like-structure
+	public UserDto updateUser (UserDto userDto) throws WalkMyDogException {
+		log.info("Update User Dto {}", userDto);
+		try {
+			if(userDto == null)
+				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
+						"User object must be provided");
+			
+			User user = modelMapper.map(userDto, User.class);
+			Document updateDoc = new Document();
+			Update update = new Update();
+			mongoTemplate.getConverter().write(user, updateDoc);
+			updateDoc.values().removeIf(Objects::isNull);
+			updateDoc.forEach(update::set);
+//			update.set("provider.lastName" , "kjj");
+//			mongoTemplate.up
+//			
+//			mongoTemplate.findAndModify(
+//					Query.query(Criteria.where("id").is(user.getId())), update, User.class);		
+//			
+			
+			return modelMapper.map(userRepository.findById(user.getId()), UserDto.class);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return null;
+		
 	}
 	
 	@Override

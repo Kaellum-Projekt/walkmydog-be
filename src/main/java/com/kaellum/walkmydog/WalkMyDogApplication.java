@@ -6,9 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.kaellum.walkmydog.provider.utils.AddressAuditMongoEventListener;
-
-
 @SpringBootApplication
 @EnableMongoAuditing
 public class WalkMyDogApplication {
@@ -24,8 +21,8 @@ public class WalkMyDogApplication {
 	
 	//Not ideal solution for auditing the document Address, but while I don't find a proper way to save that information this will do
 
-	 @Bean public AddressAuditMongoEventListener userCascadingMongoEventListener()
-	 { return new AddressAuditMongoEventListener(); }
+//	 @Bean public AddressAuditMongoEventListener userCascadingMongoEventListener()
+//	 { return new AddressAuditMongoEventListener(); }
 	 
   
 //	@Bean

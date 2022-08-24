@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.kaellum.walkmydog.authentication.services.TokenService;
 import com.kaellum.walkmydog.config.securityfilter.CustomAuthenticationFilter;
 import com.kaellum.walkmydog.config.securityfilter.CustomAuthorizationFilter;
 import com.kaellum.walkmydog.user.services.UserService;
@@ -30,6 +31,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 	private final UserDetailsService userDetailsService;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final UserService userService;
+	private final TokenService tokenService;
+
 	
 	@Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -39,7 +42,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 	@Override
     protected void configure(HttpSecurity http) throws Exception 
     {
-        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean(), userService);
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean(), userService, tokenService);
         customAuthenticationFilter.setFilterProcessesUrl("/api/auth/login");
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(STATELESS);
@@ -49,8 +52,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
 //        http.authorizeRequests().antMatchers(POST, "/api/provider/**","/api/user/**").hasAnyAuthority("ROLE_PROVIDER", "ROLE_CLIENT");
 //        http.authorizeRequests().antMatchers(PUT, "/api/provider/**","/api/user/**").hasAnyAuthority("ROLE_PROVIDER", "ROLE_CLIENT");
 //        http.authorizeRequests().antMatchers(DELETE, "/api/provider/**","/api/user/**").hasAnyAuthority("ROLE_PROVIDER", "ROLE_CLIENT");
-        http.authorizeRequests().antMatchers("/api/provider/add", "/api/provider/update").hasAnyAuthority("ROLE_PROVIDER");
-        http.authorizeRequests().antMatchers("/api/user/**").hasAnyAuthority("ROLE_CLIENT");
+//        http.authorizeRequests().antMatchers("/api/provider/add", "/api/provider/update").hasAnyAuthority("ROLE_PROVIDER");
+        http.authorizeRequests().antMatchers("/api/user/**").hasAnyAuthority("ROLE_CLIENT", "ROLE_PROVIDER");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(customAuthenticationFilter);
         http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -71,5 +74,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter implements W
         provider.setPasswordEncoder(bCryptPasswordEncoder);
         provider.setUserDetailsService(userDetailsService);
         return provider;
-    }   
+    }
+
 }

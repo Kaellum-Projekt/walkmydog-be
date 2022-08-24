@@ -1,15 +1,13 @@
-package com.kaellum.walkmydog.provider.collections;
+package com.kaellum.walkmydog.user.collections;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import org.bson.types.ObjectId;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.kaellum.walkmydog.provider.dtos.enums.TimeRange;
-import com.kaellum.walkmydog.provider.dtos.enums.WeekDays;
+import com.kaellum.walkmydog.user.dto.enums.TimeRange;
+import com.kaellum.walkmydog.user.dto.enums.WeekDays;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,9 +19,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Provider extends Audit<ObjectId>{
+public class Provider{
 	
-	private ObjectId id = new ObjectId();
+	//private ObjectId id = new ObjectId();
 	private String firstName;
 	private String lastName;
 	private LocalDate dob;
@@ -37,10 +35,4 @@ public class Provider extends Audit<ObjectId>{
 	private LocalDateTime deactivationDate;
 	private Set<Reviews> ratings;
 	private String role;
-
-	@Override
-	public boolean isNew() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

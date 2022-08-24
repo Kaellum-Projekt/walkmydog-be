@@ -1,4 +1,4 @@
-package com.kaellum.walkmydog.provider.collections;
+package com.kaellum.walkmydog.user.collections;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -14,7 +14,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Address extends Audit<ObjectId>{
+public class Address {
 	
 	@Id
 	private ObjectId id = new ObjectId();
@@ -24,10 +24,4 @@ public class Address extends Audit<ObjectId>{
 	private String province;
 	private String country;
 	private String postalCode;
-	
-	@Override
-	public boolean isNew() {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

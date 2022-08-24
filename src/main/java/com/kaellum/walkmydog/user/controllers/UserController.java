@@ -46,6 +46,13 @@ public class UserController {
 		
 	}
 	
+	@PutMapping("/update")
+	@ResponseStatus(HttpStatus.OK)
+	@PreAuthorize("@userResolverUser.isOwner(#userDto)")
+	public UserDto updateUser(@Valid @RequestBody UserDto userDto) {
+		return userService.updateUser(userDto);		
+	}
+	
 	@PutMapping("/update-password")
 	@ResponseStatus(HttpStatus.OK)
 	@PreAuthorize("@userResolverUser.isOwner(#userId)")

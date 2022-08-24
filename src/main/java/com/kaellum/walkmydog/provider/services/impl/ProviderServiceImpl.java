@@ -1,7 +1,6 @@
 
 package com.kaellum.walkmydog.provider.services.impl;
 
-import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.CREATE_API;
 import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.READ_API;
 import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.UPDATE_API;
 
@@ -19,11 +18,10 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.kaellum.walkmydog.exception.WalkMyDogException;
-import com.kaellum.walkmydog.provider.collections.Provider;
-import com.kaellum.walkmydog.provider.collections.repository.ProviderRepository;
-import com.kaellum.walkmydog.provider.dtos.ProviderDto;
 import com.kaellum.walkmydog.provider.services.ProviderService;
+import com.kaellum.walkmydog.user.collections.Provider;
 import com.kaellum.walkmydog.user.collections.User;
+import com.kaellum.walkmydog.user.dto.ProviderDto;
 import com.kaellum.walkmydog.user.repositories.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -35,7 +33,7 @@ import lombok.extern.log4j.Log4j2;
 public class ProviderServiceImpl implements ProviderService{
 
 	private final ModelMapper modelMapper;
-	private final ProviderRepository providerRepository;
+	//private final ProviderRepository providerRepository;
 	private final UserRepository userRepository;
 	private final MongoTemplate mongoTemplate;
 	
@@ -43,22 +41,23 @@ public class ProviderServiceImpl implements ProviderService{
 	@Override
 	public ProviderDto addProvider(ProviderDto dto, String email) {
 
-		ProviderDto resp = null;
-		try {
-			
-			Provider entity = modelMapper.map(dto, Provider.class);
-			entity.setCreatedBy(email);
-			//entity.setDeactivationDate(LocalDateTime.now());// REMOVE THAT CRAP LATER
-			
-			resp = modelMapper.map(providerRepository.save(entity), ProviderDto.class);
-		} catch (WalkMyDogException we) {
-			log.error(we.getAdditionalData(), we);
-			throw we;
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			throw WalkMyDogException.buildCriticalRuntime(CREATE_API, e, "Error creating the following provider : " + dto.toString());
-		}		
-		return resp;
+//		ProviderDto resp = null;
+//		try {
+//			
+//			Provider entity = modelMapper.map(dto, Provider.class);
+//			//entity.setCreatedBy(email);
+//			//entity.setDeactivationDate(LocalDateTime.now());// REMOVE THAT CRAP LATER
+//			
+//			resp = modelMapper.map(providerRepository.save(entity), ProviderDto.class);
+//		} catch (WalkMyDogException we) {
+//			log.error(we.getAdditionalData(), we);
+//			throw we;
+//		} catch (Exception e) {
+//			log.error(e.getMessage(), e);
+//			throw WalkMyDogException.buildCriticalRuntime(CREATE_API, e, "Error creating the following provider : " + dto.toString());
+//		}		
+//		return resp;
+		return null;
 	}
 
 //	@Override
@@ -100,29 +99,29 @@ public class ProviderServiceImpl implements ProviderService{
 
 	@Override
 	public ProviderDto updateProvider(ProviderDto dto) throws WalkMyDogException {
-		if(dto.getId().equalsIgnoreCase(null))
-			throw WalkMyDogException.buildWarningValidationFail(UPDATE_API, "Provider id must be provided");
-		
+//		if(dto.getId().equalsIgnoreCase(null))
+//			throw WalkMyDogException.buildWarningValidationFail(UPDATE_API, "Provider id must be provided");
+//		
 		ProviderDto resp = null;
-		try {
-			Provider entity = providerRepository.findById(dto.getId()).get();
-			modelMapper.map(dto, entity);
-			
-			resp = modelMapper.map(providerRepository.save(entity), ProviderDto.class);
-		} catch (WalkMyDogException e) {
-			log.error(e.getErrorMessage(), e);
-			throw e;
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			throw WalkMyDogException.buildCriticalRuntime(UPDATE_API, e);
-		}
+//		try {
+//			Provider entity = providerRepository.findById(dto.getId()).get();
+//			modelMapper.map(dto, entity);
+//			
+//			resp = modelMapper.map(providerRepository.save(entity), ProviderDto.class);
+//		} catch (WalkMyDogException e) {
+//			log.error(e.getErrorMessage(), e);
+//			throw e;
+//		} catch (Exception e) {
+//			log.error(e.getMessage(), e);
+//			throw WalkMyDogException.buildCriticalRuntime(UPDATE_API, e);
+//		}
 		return resp;		
 	}
 
 	@Override
 	public boolean deleteProvider(String id) {
 		try {
-			providerRepository.deleteById(id);
+			//providerRepository.deleteById(id);
 			return true;
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);

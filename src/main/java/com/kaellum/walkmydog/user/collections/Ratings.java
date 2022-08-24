@@ -1,4 +1,4 @@
-package com.kaellum.walkmydog.provider.collections;
+package com.kaellum.walkmydog.user.collections;
 
 import java.util.Set;
 

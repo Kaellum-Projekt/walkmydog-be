@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -58,16 +59,8 @@ public class TokenServiceImpl implements TokenService, UserDetailsService {
                 DecodedJWT decodedJWT = verifier.verify(refresh_token);
                 String username = decodedJWT.getSubject();
                 UserDto userDto = userService.getUserByEmail(username);
-                String access_token = JWT.create()
-                        .withSubject(userDto.getEmail())
-                        .withClaim("firstName" , userDto.getProviderDto().getFirstName())
-                        .withClaim("lastName" , userDto.getProviderDto().getLastName())
-                        .withClaim("id", userDto.getId())
-                        .withClaim("isVerified", userDto.getIsVerified())
-                        .withExpiresAt(new Date(System.currentTimeMillis() + 6000 * 60 * 1000))
-                        .withIssuer(request.getRequestURL().toString())
-                        .withClaim("roles", userDto.getProviderDto().getRole())
-                        .sign(algorithm);
+                String access_token = 
+                		this.getAcessToken(userDto, request.getRequestURL().toString(), List.of(userDto.getProviderDto().getRole()), false);
                 Map<String, String> tokens = new HashMap<>();
                 tokens.put("access_token", access_token);
                 tokens.put("refresh_token", refresh_token);
@@ -92,15 +85,31 @@ public class TokenServiceImpl implements TokenService, UserDetailsService {
         }
     }
 	
+	
+	@Override
+	public String getAcessToken(UserDto userDto, String requestUrl, List<String> roles, boolean isRefreshToken) {
+		Algorithm algorithm = Algorithm.HMAC256(System.getenv("WMD_SECRET_KEY").getBytes());
+		return JWT.create()
+                .withSubject(userDto.getEmail())
+                .withClaim("firstName" , userDto.getProviderDto().getFirstName())
+                .withClaim("lastName" , userDto.getProviderDto().getLastName())
+                .withClaim("id", userDto.getId())
+                .withClaim("isVerified", userDto.getIsVerified())
+                .withExpiresAt(new Date(System.currentTimeMillis() + (isRefreshToken?6000:60) * 60 * 1000))
+                .withIssuer(requestUrl)
+                .withClaim("roles", roles)
+                .sign(algorithm);	
+	}
+	
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserDto userDto = userService.getUserByEmail(username);
         if(userDto == null) {
             log.error("User {} not found in the database", username);
           throw new UsernameNotFoundException("User "+ username +" not found in the database");
-        }else if (userDto != null && !userDto.getIsVerified()){
-        	log.error("User {} found in the database, however not activated", username);
-            throw new UsernameNotFoundException("User "+ username +" not activated yet");
+//        }else if (userDto != null && !userDto.getIsVerified()){
+//        	log.error("User {} found in the database, however not activated", username);
+//            throw new UsernameNotFoundException("User "+ username +" not activated yet");
         }else if (userDto != null && userDto.getDeactivationDate() != null){
         	log.error("User {} found in the database, however it is deactivated", username);
             throw new UsernameNotFoundException("User "+ username +" is currently deactivated");            

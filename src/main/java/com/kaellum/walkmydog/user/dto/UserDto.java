@@ -8,7 +8,6 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.kaellum.walkmydog.provider.dtos.ProviderDto;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

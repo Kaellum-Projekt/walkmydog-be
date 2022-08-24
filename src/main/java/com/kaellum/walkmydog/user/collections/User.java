@@ -4,11 +4,7 @@ package com.kaellum.walkmydog.user.collections;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import com.kaellum.walkmydog.provider.collections.Audit;
-import com.kaellum.walkmydog.provider.collections.Provider;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;

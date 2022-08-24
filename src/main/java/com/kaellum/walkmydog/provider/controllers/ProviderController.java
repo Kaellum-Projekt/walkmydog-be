@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kaellum.walkmydog.exception.WalkMyDogException;
-import com.kaellum.walkmydog.provider.dtos.ProviderDto;
 import com.kaellum.walkmydog.provider.services.ProviderService;
+import com.kaellum.walkmydog.user.dto.ProviderDto;
 
 import lombok.RequiredArgsConstructor;
 

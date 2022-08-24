@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 
 import com.kaellum.walkmydog.exception.WalkMyDogException;
-import com.kaellum.walkmydog.provider.dtos.ProviderDto;
+import com.kaellum.walkmydog.user.dto.ProviderDto;
 
 public interface ProviderService {
 	

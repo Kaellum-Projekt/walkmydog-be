@@ -2,6 +2,7 @@ package com.kaellum.walkmydog.user.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Map;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -13,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.PropertyAccessorFactory;
+
 
 /**
  * 
@@ -41,7 +43,7 @@ public class CustomValidator implements ConstraintValidator<CustomObjectValidati
     @Override
     public boolean isValid(Object object, ConstraintValidatorContext context) {
         try {
-            wrapper = PropertyAccessorFactory.forBeanPropertyAccess(object);
+        	wrapper = PropertyAccessorFactory.forBeanPropertyAccess(object);
             Object conditionalPropertyValue = wrapper.getPropertyValue(conditionalProperty);
             if (doConditionalValidation(conditionalPropertyValue)) {
                 return validateRequiredProperties(object, context);
