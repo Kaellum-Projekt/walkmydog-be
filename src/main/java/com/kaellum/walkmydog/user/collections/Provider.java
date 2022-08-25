@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.kaellum.walkmydog.user.dto.enums.TimeRange;
@@ -21,7 +22,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Provider{
 	
-	//private ObjectId id = new ObjectId();
+	private ObjectId id = new ObjectId();
 	private String firstName;
 	private String lastName;
 	private LocalDate dob;

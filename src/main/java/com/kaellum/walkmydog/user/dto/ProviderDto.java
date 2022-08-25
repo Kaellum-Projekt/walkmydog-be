@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 //        requiredProperties = {"phone", "price", "days", "hours", "geoLocation", "addresses"})
 public class ProviderDto {
 	
-	//private String id;
+	private String id;
 	@NotNull @NotEmpty
 	private String firstName;
 	@NotNull @NotEmpty
