@@ -83,10 +83,10 @@ public class ProviderServiceImpl implements ProviderService{
 		ProviderDto resp = null;
 		try {
 			
-			Provider dto = userRepository.findByProviderId(id)
-					.orElseThrow(() -> WalkMyDogException.buildWarningNotFound(READ_API, String.format("Provider %s not found", id)));
+//			Provider dto = userRepository.findByProviderId(id)
+//					.orElseThrow(() -> WalkMyDogException.buildWarningNotFound(READ_API, String.format("Provider %s not found", id)));
 
-			resp = modelMapper.map(dto, ProviderDto.class);
+//			resp = modelMapper.map(dto, ProviderDto.class);
 		} catch (WalkMyDogException e) {
 			log.error(e.getErrorMessage(), e);
 			throw e;
