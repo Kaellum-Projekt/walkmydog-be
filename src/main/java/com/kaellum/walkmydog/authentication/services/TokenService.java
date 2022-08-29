@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import com.auth0.jwt.algorithms.Algorithm;
 import com.kaellum.walkmydog.user.dto.UserDto;
 
 public interface TokenService extends UserDetailsService {

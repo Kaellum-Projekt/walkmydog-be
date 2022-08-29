@@ -1,8 +1,16 @@
 package com.kaellum.walkmydog.user.controllers;
 
+import java.util.List;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,9 +23,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kaellum.walkmydog.exception.ConflictWalkMyDogException;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
+import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExReasons;
+import com.kaellum.walkmydog.user.dto.ProviderDto;
+import com.kaellum.walkmydog.user.dto.ProviderUserIDDto;
 import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
 import com.kaellum.walkmydog.user.services.UserService;
@@ -33,16 +45,20 @@ public class UserController {
 	
 	@PostMapping("/signup")
 	@ResponseStatus(HttpStatus.CREATED)
-	public UserDto createNewUser(@Valid @RequestBody UserDto userDto) {
+	public void createNewUser(@Valid @RequestBody UserDto userDto, HttpServletRequest request, HttpServletResponse response) {
 		try {
-			return userService.addNewUser(userDto);	
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            response.setStatus(HttpStatus.OK.value());
+            new ObjectMapper().writeValue(response.getOutputStream(), userService.addNewUser(userDto, request.getRequestURI()));	
 		} catch (WalkMyDogException e) {
 			if(e.getExceptionReason().equals(WalkMyDogExReasons.DUPLICATE_RESOURCE)) {
 				throw new ConflictWalkMyDogException(e);
 			}else {
 				throw e;
 			}
-		}
+		} catch (Exception e) {
+			throw WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
+		} 
 		
 	}
 	
@@ -89,6 +105,25 @@ public class UserController {
 	@ResponseStatus(HttpStatus.OK)
 	public void passwordReset(@Valid @RequestBody UserPasswordUpdate userPasswordUpdate, @PathVariable String passwordResetCode) {
 		userService.passwordReset(userPasswordUpdate, passwordResetCode);
+	}
+	
+	//**** PROVIDER ENDPOINTS ****//
+	@GetMapping("/provider/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	public ProviderDto getProviderById (@PathVariable String id) throws WalkMyDogException {
+		return userService.getProviderById(id);
+	}
+	
+	@GetMapping("/provider")
+	@ResponseStatus(HttpStatus.OK)
+	public List<ProviderUserIDDto> advancedSearch (
+			@RequestParam Optional<Double> priceMin,
+			@RequestParam Optional<Double> priceMax,
+			@RequestParam Optional<List<Integer>> timeRange,
+			@RequestParam Optional<String> province,
+			@RequestParam Optional<String> city,
+			@PageableDefault Pageable pageable ) throws WalkMyDogException {
+		return userService.advancedSearch(priceMin, priceMax, timeRange, province, city, pageable);
 	}
 
 

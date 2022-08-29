@@ -1,7 +1,5 @@
 package com.kaellum.walkmydog.user.collections;
 
-import org.bson.types.ObjectId;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -16,12 +14,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Address {
 	
-	@Id
-	private ObjectId id = new ObjectId();
+//	@Id
+//	private ObjectId id = new ObjectId();
 	private String street;
 	private String street2;
 	private String city;
 	private String province;
 	private String country;
 	private String postalCode;
+	private Object geoLocation;
 }

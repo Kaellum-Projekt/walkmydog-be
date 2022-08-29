@@ -1,9 +1,15 @@
 package com.kaellum.walkmydog.user.services.impl;
 
 import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.CREATE_API;
+import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.READ_API;
+import static com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes.UPDATE_API;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -11,18 +17,25 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.kaellum.walkmydog.authentication.services.TokenService;
 import com.kaellum.walkmydog.emailsender.EmailDetailsDtos;
 import com.kaellum.walkmydog.emailsender.EmailSenderEventPublisher;
 import com.kaellum.walkmydog.emailsender.EmailType;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
 import com.kaellum.walkmydog.user.collections.User;
+import com.kaellum.walkmydog.user.dto.ProviderDto;
+import com.kaellum.walkmydog.user.dto.ProviderUserIDDto;
 import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
 import com.kaellum.walkmydog.user.repositories.UserRepository;
@@ -32,7 +45,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 @Service 
-@RequiredArgsConstructor 
+@RequiredArgsConstructor(onConstructor=@__({@Lazy})) 
 @Log4j2
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
@@ -40,13 +53,14 @@ public class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final EmailSenderEventPublisher emailSenderEventPublisher;
     private final MongoTemplate mongoTemplate;
+    private final @Lazy TokenService tokenService;
     
     public static String USERNAME;
 
 	@Override
-	public UserDto addNewUser(UserDto userDto) throws WalkMyDogException {
+	public Map<String, String> addNewUser(UserDto userDto, String httpRequestUrl) throws WalkMyDogException {
 		log.info("New User Dto {}", userDto);
-		UserDto dtoReturn = null;
+		//UserDto dtoReturn = null;
 		try {
 			if(userDto == null)
 				throw WalkMyDogException.buildWarningValidationFail(WalkMyDogExApiTypes.CREATE_API, 
@@ -78,12 +92,18 @@ public class UserServiceImpl implements UserService {
 			
 			userRepository.save(userDoc);		
 			
-			dtoReturn = modelMapper.map(userDoc, UserDto.class);
+			//dtoReturn = modelMapper.map(userDoc, UserDto.class);
 			
 			//Send email for activation
 		    EmailDetailsDtos emDtos = new EmailDetailsDtos(userDto.getProviderDto().getFirstName(), userDto.getEmail(), activationCode, EmailType.ACTIVATION);
 			emailSenderEventPublisher.publishEmailSenderEvent(emDtos);
 			
+			Map<String, String> tokens = new HashMap<>();
+			String access_token = tokenService.getAcessToken(userDto, httpRequestUrl, List.of(userDto.getProviderDto().getRole()), false);
+			String refresh_token = tokenService.getAcessToken(userDto, httpRequestUrl, List.of(userDto.getProviderDto().getRole()), true);
+			tokens.put("access_token", access_token);
+            tokens.put("refresh_token", refresh_token);
+            return tokens;			
 		} catch (WalkMyDogException we) {
 			log.error(we.getMessage(), we);
 			throw we;
@@ -91,7 +111,6 @@ public class UserServiceImpl implements UserService {
 			log.error(e.getMessage(), e);
 			throw WalkMyDogException.buildCriticalRuntime(WalkMyDogExApiTypes.CREATE_API, e, e.getMessage());
 		}
-		return dtoReturn;
 	}
 	
 	//https://stackoverflow.com/questions/41377883/how-to-perform-partial-update-with-spring-data-mongodbmongooperations
@@ -354,6 +373,77 @@ public class UserServiceImpl implements UserService {
 	public UserDto getUserByEmail(String email) {
 		return modelMapper.map(userRepository.findUserByEmail(email), UserDto.class);
 	}
+
+	//**** PROVIDER ENDPOINTS ****//
+	@Override
+	public List<ProviderUserIDDto> advancedSearch(Optional<Double> priceMin, Optional<Double> priceMax, Optional<List<Integer>> 
+	timeRange, Optional<String> province, Optional<String> city, Pageable pageable) throws WalkMyDogException {
+		
+		try {
+			List<User> users = null;
+			List<ProviderUserIDDto> dtosReturn = new ArrayList<>();
+			
+			final Query query = new Query().with(pageable);
+			final List<Criteria> criteria = new ArrayList<>();
+			
+			criteria.add(Criteria.where("provider.role").in("ROLE_PROVIDER"));
+			
+			if(city.isPresent())
+				criteria.add(Criteria.where("provider.addresses").elemMatch(Criteria.where("city").is(city.get())));				
+			
+			if(priceMin.isPresent())
+				criteria.add(Criteria.where("provider.price").gte(priceMin.get()));
+			
+			if(priceMax.isPresent())
+				criteria.add(Criteria.where("provider.price").lte(priceMax.get()));
+			
+			if(timeRange.isPresent())
+				criteria.add(Criteria.where("provider.timeRanges").in(timeRange.get()));
+			
+			if(province.isPresent())
+				criteria.add(Criteria.where("provider.addresses").elemMatch(Criteria.where("province").is(province.get())));	
+				
+			if (!criteria.isEmpty())
+				query.addCriteria(new Criteria().andOperator(criteria.toArray(new Criteria[criteria.size()])));
+			
+			users = mongoTemplate.find(query, User.class);	
+			
+			users.stream()
+			.forEach(x -> {
+				ProviderUserIDDto dto = modelMapper.map(x.getProvider(), ProviderUserIDDto.class);
+				dto.setId(x.getId());
+				dtosReturn.add(dto);
+			});
+			
+			return dtosReturn;
+
+		} catch (WalkMyDogException e) {
+			log.error(e.getErrorMessage(), e);
+			throw e;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw WalkMyDogException.buildCriticalRuntime(UPDATE_API, e);
+		}
+	}
 	
-	
+	@Override
+	public ProviderDto getProviderById(String id) throws WalkMyDogException {
+		log.info("String Id {}", id);
+		if(id.equalsIgnoreCase(null) || id.isBlank())
+			throw WalkMyDogException.buildWarningNotFound(READ_API, String.format("User id not provided"));
+		try {
+			
+			User user = userRepository.findById(id)
+					.orElseThrow(() -> WalkMyDogException.buildWarningNotFound(READ_API, String.format("User %s not found", id)));
+
+			return modelMapper.map(user.getProvider(), ProviderDto.class);
+		} catch (WalkMyDogException e) {
+			log.error(e.getErrorMessage(), e);
+			throw e;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw WalkMyDogException.buildCriticalRuntime(READ_API, e);
+		}
+	}
 }
+	

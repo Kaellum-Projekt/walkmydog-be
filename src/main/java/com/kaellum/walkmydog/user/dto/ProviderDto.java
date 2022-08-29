@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 //        requiredProperties = {"phone", "price", "days", "hours", "geoLocation", "addresses"})
 public class ProviderDto {
 	
-	private String id;
+//	private String id;
 	@NotNull @NotEmpty
 	private String firstName;
 	@NotNull @NotEmpty
@@ -32,7 +32,6 @@ public class ProviderDto {
 	private Double price;
 	private Set<WeekDays> days;
 	private Set<TimeRange> hours;
-	private String geoLocation;
 	private Set<AddressDto> addresses;
 	private Ratings ratings;
 	@NotNull @NotEmpty

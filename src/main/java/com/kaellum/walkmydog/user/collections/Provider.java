@@ -28,7 +28,6 @@ public class Provider{
 	private LocalDate dob;
 	private String phone;
 	private Double price;
-	private Object geoLocation;
 	private Set<WeekDays> days;
 	private Set<TimeRange> hours;
 	private Set<Address> addresses;

@@ -6,7 +6,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import com.kaellum.walkmydog.user.collections.Provider;
 import com.kaellum.walkmydog.user.collections.User;
 
 @Repository
@@ -22,7 +21,4 @@ public interface UserRepository extends MongoRepository<User, String>{
 	
 	Optional<User> findByUserTempCode(String userTempCode);
 	
-	//Optional<Provider> findByProviderId(String id);
-	
-
 }
