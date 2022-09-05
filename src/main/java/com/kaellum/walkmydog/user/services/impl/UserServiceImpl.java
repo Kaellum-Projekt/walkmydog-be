@@ -90,17 +90,15 @@ public class UserServiceImpl implements UserService {
 			userDoc.setUserTempCode(activationCode);
 			userDoc.setIsVerified(false); 
 			
-			userRepository.save(userDoc);		
-			
-			//dtoReturn = modelMapper.map(userDoc, UserDto.class);
-			
+			UserDto savedUser = modelMapper.map(userRepository.save(userDoc), UserDto.class);
+
 			//Send email for activation
-		    EmailDetailsDtos emDtos = new EmailDetailsDtos(userDto.getProviderDto().getFirstName(), userDto.getEmail(), activationCode, EmailType.ACTIVATION);
+		    EmailDetailsDtos emDtos = new EmailDetailsDtos(savedUser.getProviderDto().getFirstName(), savedUser.getEmail(), activationCode, EmailType.ACTIVATION);
 			emailSenderEventPublisher.publishEmailSenderEvent(emDtos);
 			
 			Map<String, String> tokens = new HashMap<>();
-			String access_token = tokenService.getAcessToken(userDto, httpRequestUrl, List.of(userDto.getProviderDto().getRole()), false);
-			String refresh_token = tokenService.getAcessToken(userDto, httpRequestUrl, List.of(userDto.getProviderDto().getRole()), true);
+			String access_token = tokenService.getAcessToken(savedUser, httpRequestUrl, List.of(savedUser.getProviderDto().getRole()), false);
+			String refresh_token = tokenService.getAcessToken(savedUser, httpRequestUrl, List.of(savedUser.getProviderDto().getRole()), true);
 			tokens.put("access_token", access_token);
             tokens.put("refresh_token", refresh_token);
             return tokens;			
@@ -128,14 +126,11 @@ public class UserServiceImpl implements UserService {
 			mongoTemplate.getConverter().write(user, updateDoc);
 			updateDoc.values().removeIf(Objects::isNull);
 			updateDoc.forEach(update::set);
-//			update.set("provider.lastName" , "kjj");
-//			mongoTemplate.up
-//			
-//			mongoTemplate.findAndModify(
-//					Query.query(Criteria.where("id").is(user.getId())), update, User.class);		
-//			
+		
+			mongoTemplate.findAndModify(
+					Query.query(Criteria.where("id").is(user.getId())), update, User.class);		
 			
-			return modelMapper.map(userRepository.findById(user.getId()), UserDto.class);
+			return modelMapper.map(userRepository.findById(user.getId()).get(), UserDto.class);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}

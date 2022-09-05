@@ -479,7 +479,29 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"pm.collectionVariables.set(\"password\", Math.random().toString(36).slice(2, 10));"
+									"function randomPassword(len = 8, minUpper = 0, minLower = 0, minNumber = -1, minSpecial = -1) {\r",
+									"    let specChars = \"!@#$&*\"; \r",
+									"        chars = specChars[Math.floor(Math.random() * specChars.length)]; \r",
+									"    //String.fromCharCode(...Array(127).keys()).slice(33),//chars\r",
+									"        A2Z = String.fromCharCode(...Array(91).keys()).slice(65),//A-Z\r",
+									"        a2z = String.fromCharCode(...Array(123).keys()).slice(97),//a-z\r",
+									"        zero2nine = String.fromCharCode(...Array(58).keys()).slice(48),//0-9\r",
+									"        specials = chars.replace(/\\w/g, '')\r",
+									"    if (minSpecial < 0) chars = zero2nine + A2Z + a2z\r",
+									"    if (minNumber < 0) chars = chars.replace(zero2nine, '')\r",
+									"    let minRequired = minSpecial + minUpper + minLower + minNumber\r",
+									"    let rs = [].concat(\r",
+									"        Array.from({length: minSpecial ? minSpecial : 0}, () => specials[Math.floor(Math.random() * specials.length)]),\r",
+									"        Array.from({length: minUpper ? minUpper : 0}, () => A2Z[Math.floor(Math.random() * A2Z.length)]),\r",
+									"        Array.from({length: minLower ? minLower : 0}, () => a2z[Math.floor(Math.random() * a2z.length)]),\r",
+									"        Array.from({length: minNumber ? minNumber : 0}, () => zero2nine[Math.floor(Math.random() * zero2nine.length)]),\r",
+									"        Array.from({length: Math.max(len, minRequired) - (minRequired ? minRequired : 0)}, () => chars[Math.floor(Math.random() * chars.length)]),\r",
+									"    )\r",
+									"    return rs.sort(() => Math.random() > Math.random()).join('')\r",
+									"}\r",
+									"\r",
+									"pm.collectionVariables.set(\"password\", randomPassword(8, 2, 3, 2, 0));\r",
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -488,17 +510,31 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"const parseJwt = (token) => {\r",
+									"  try {\r",
+									"      console.log(JSON.parse(atob(token.split('.')[1])));\r",
+									"      const jsonUser = JSON.parse(atob(token.split('.')[1]));\r",
+									"      pm.collectionVariables.set(\"username\", jsonUser.sub);\r",
+									"      pm.collectionVariables.set(\"firstname\", jsonUser.firstName);\r",
+									"      pm.collectionVariables.set(\"lastname\", jsonUser.lastName); \r",
+									"      pm.collectionVariables.set(\"id\", jsonUser.id); \r",
+									"    return JSON.parse(atob(token.split('.')[1]));\r",
+									"  } catch (e) {\r",
+									"    return null;\r",
+									"  }\r",
+									"};\r",
+									"\r",
+									"\r",
 									"const json = pm.response.json();\r",
 									"\r",
 									"pm.test(\"Save response body variables to collections variables\", function () {\r",
 									"    pm.response.to.have.status(201);\r",
 									"    pm.expect(json.id).not.to.equal(null);\r",
-									"    pm.collectionVariables.set(\"id\", json.id);\r",
-									"    pm.collectionVariables.set(\"firstname\", json.firstName);\r",
-									"    pm.collectionVariables.set(\"lastname\", json.lastName);\r",
-									"    pm.collectionVariables.set(\"email\", json.email);\r",
-									"    pm.collectionVariables.set(\"profileid\", json.profile.id);\r",
+									"    pm.collectionVariables.set(\"access_token\", json.access_token);\r",
+									"    pm.collectionVariables.set(\"refresh_token\", json.refresh_token);\r",
+									"    parseJwt(json.access_token);\r",
 									"});\r",
+									"\r",
 									""
 								],
 								"type": "text/javascript"
@@ -522,14 +558,14 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJSYXBoYWVsIiwicm9sZXMiOlsiUk9MRV9DTElFTlQiXSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL2FwaS9hdXRoL2xvZ2luIiwiZXhwIjoxNjU3MjU4ODY2fQ.rm8qXh0B1RJ1RKKweLvHu91m3czDRNV0KL1SYiqK_V4",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJDcnlzdGFsX0FybXN0cm9uZ0B5YWhvby5jb20iLCJmaXJzdE5hbWUiOiJBbHZpcyIsImxhc3ROYW1lIjoiTGVncm9zIiwiaXNWZXJpZmllZCI6dHJ1ZSwicm9sZXMiOlsiUk9MRV9QUk9WSURFUiJdLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvYXBpL2F1dGgvbG9naW4iLCJpZCI6IjYzMDFiZTc3YTQyMjhhMDc0YmY4YjgzMSIsImV4cCI6MTY2MTA2MjI5OH0.tUmTiZ1ycqMNOvgwjBk8R5sk0nXFJvjBP_VNCVdGGj4",
 								"type": "text",
 								"disabled": true
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"firstName\" : \"{{$randomFirstName}}\",\r\n    \"lastName\" : \"{{$randomLastName}}\", \r\n    \"email\" : \"{{$randomEmail}}\",\r\n    \"password\" : \"{{password}}\",\r\n    \"phone\" : \"{{$randomPhoneNumber}}\",\r\n    \"role\" : \"ROLE_PROVIDER\",\r\n    \"profile\" : {\r\n        \"dob\" : \"2010-01-12\",\r\n        \"price\" : {{$randomPrice}},\r\n        \"hours\" : [1,2],\r\n        \"days\" : [1,3],\r\n        \"geoLocation\" : \"{{$randomLongitude}}\",\r\n        \"address\" : [\r\n            {\r\n               \"street\": \"{{$randomStreetName}}\",\r\n               \"street2\": \"{{$randomStreetName}}\",\r\n               \"city\": \"{{$randomCity}}\",\r\n               \"province\": \"{{$randomLocale}}\",\r\n               \"country\": \"{{$randomCountry}}\",\r\n               \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n            },\r\n            {\r\n               \"street\": \"{{$randomStreetName}}\",\r\n               \"street2\": \"{{$randomStreetName}}\",\r\n               \"city\": \"{{$randomCity}}\",\r\n               \"province\": \"{{$randomLocale}}\",\r\n               \"country\": \"{{$randomCountry}}\",\r\n               \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n            }\r\n        ]        \r\n    }\r\n}",
+							"raw": "{\r\n    \"email\" : \"{{$randomEmail}}\",\r\n    \"password\" : \"{{password}}\",\r\n    \"profile\" : {\r\n        \"firstName\" : \"{{$randomFirstName}}\",\r\n        \"lastName\" : \"{{$randomLastName}}\",\r\n        \"role\" : \"ROLE_PROVIDER\"\r\n    }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -546,253 +582,6 @@
 								"api",
 								"user",
 								"signup"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const json = pm.response.json();\r",
-									"pm.test(\"Save response body variables to collections variables\", function () {\r",
-									"    pm.response.to.have.status(200);\r",
-									"    pm.collectionVariables.set(\"accesstokenprovider\", json.access_token);\r",
-									"    pm.collectionVariables.set(\"refreshtoken\", json.refresh_token);\r",
-									"});\r",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "username",
-								"value": "marcusgeh",
-								"type": "text",
-								"disabled": true
-							},
-							{
-								"key": "password",
-								"value": "0123xxx",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "urlencoded",
-							"urlencoded": [
-								{
-									"key": "username",
-									"value": "{{email}}",
-									"type": "text"
-								},
-								{
-									"key": "password",
-									"value": "{{password}}",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "localhost:8080/api/auth/login",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"auth",
-								"login"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Providers",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accesstokenprovider}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "localhost:8080/api/provider/all",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"provider",
-								"all"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Provider by Id",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accesstokenprovider}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "localhost:8080/api/provider/{{profileid}}",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"provider",
-								"{{profileid}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Advanced Search",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{accesstokenprovider}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "localhost:8080/api/provider?city=Maudefurt&price=440.11&page=0&size=10&province=hy",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"provider"
-							],
-							"query": [
-								{
-									"key": "city",
-									"value": "Maudefurt"
-								},
-								{
-									"key": "price",
-									"value": "440.11"
-								},
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "10"
-								},
-								{
-									"key": "lastName",
-									"value": "{lname}",
-									"disabled": true
-								},
-								{
-									"key": "province",
-									"value": "hy"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add Provider -  NEED FIX",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"pm.collectionVariables.set(\"password\", Math.random().toString(36).slice(2, 10));"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const json = pm.response.json();\r",
-									"\r",
-									"pm.test(\"Save response body variables to collections variables\", function () {\r",
-									"    pm.response.to.have.status(201);\r",
-									"    pm.expect(json.id).not.to.equal(null);\r",
-									"    pm.collectionVariables.set(\"id\", json.id);\r",
-									"    pm.collectionVariables.set(\"firstname\", json.firstName);\r",
-									"    pm.collectionVariables.set(\"lastname\", json.lastName);\r",
-									"    pm.collectionVariables.set(\"email\", json.email);\r",
-									"    pm.collectionVariables.set(\"profileid\", json.profile.id);\r",
-									"});\r",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "username",
-								"value": "marcusgeh",
-								"type": "text",
-								"disabled": true
-							},
-							{
-								"key": "password",
-								"value": "0123xxx",
-								"type": "text",
-								"disabled": true
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{    \r\n    \"dob\" : \"2010-01-12\",\r\n    \"price\" : {{$randomPrice}},\r\n    \"hours\" : [1,2],\r\n    \"days\" : [1,3],\r\n    \"geoLocation\" : \"{{$randomLongitude}}\",\r\n    \"address\" : [\r\n        {\r\n            \"street\": \"{{$randomStreetName}}\",\r\n            \"street2\": \"{{$randomStreetName}}\",\r\n            \"city\": \"{{$randomCity}}\",\r\n            \"province\": \"{{$randomLocale}}\",\r\n            \"country\": \"{{$randomCountry}}\",\r\n            \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n        },\r\n        {\r\n            \"street\": \"{{$randomStreetName}}\",\r\n            \"street2\": \"{{$randomStreetName}}\",\r\n            \"city\": \"{{$randomCity}}\",\r\n            \"province\": \"{{$randomLocale}}\",\r\n            \"country\": \"{{$randomCountry}}\",\r\n            \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n        }\r\n    ]        \r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "localhost:8080/api/provider/add",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"api",
-								"provider",
-								"add"
 							]
 						}
 					},
@@ -848,13 +637,13 @@
 							},
 							{
 								"key": "Authorization",
-								"value": "Bearer {{accesstokenprovider}}",
+								"value": "Bearer {{access_token}}",
 								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{    \r\n    \"id\": \"{{profileid}}\",\r\n    \"dob\" : \"2011-09-15\",\r\n    \"price\" : {{$randomPrice}},\r\n    \"hours\" : [2],\r\n    \"days\" : [2,3],\r\n    \"geoLocation\" : \"{{$randomLongitude}}\",\r\n    \"address\" : [\r\n        {\r\n            \"street\": \"{{$randomStreetName}}\",\r\n            \"street2\": \"{{$randomStreetName}}\",\r\n            \"city\": \"{{$randomCity}}\",\r\n            \"province\": \"{{$randomLocale}}\",\r\n            \"country\": \"{{$randomCountry}}\",\r\n            \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n        },\r\n        {\r\n            \"street\": \"{{$randomStreetName}}\",\r\n            \"street2\": \"{{$randomStreetName}}\",\r\n            \"city\": \"{{$randomCity}}\",\r\n            \"province\": \"{{$randomLocale}}\",\r\n            \"country\": \"{{$randomCountry}}\",\r\n            \"postalCode\": \"{{$randomDomainSuffix}}\" \r\n        }\r\n    ]        \r\n}",
+							"raw": "{\r\n    \"id\": \"{{id}}\",\r\n    \"email\": \"{{username}}\",\r\n    \"profile\":  \r\n    {    \r\n        \"firstName\": \"{{firstname}}\" ,\r\n        \"lastName\": \"{{lastname}}\",\r\n        \"dob\" : \"2022-04-01\",\r\n        \"phone\": \"{{$randomPhoneNumber}}\",\r\n        \"price\" : \"{{$randomPrice}}\",\r\n        \"hours\" : [2],\r\n        \"days\" : [2,3],\r\n        \"addresses\" : [\r\n            {\r\n                \"street\": \"{{$randomStreetName}}\",\r\n                \"street2\": \"{{$randomStreetName}}\",\r\n                \"city\": \"{{$randomCity}}\",\r\n                \"province\": \"{{$randomLocale}}\",\r\n                \"country\": \"{{$randomCountry}}\",\r\n                \"postalCode\": \"{{$randomDomainSuffix}}\",\r\n                \"geoLocation\" : \"{{$randomLongitude}}\"\r\n            },\r\n            {\r\n                \"street\": \"{{$randomStreetName}}\",\r\n                \"street2\": \"{{$randomStreetName}}\",\r\n                \"city\": \"{{$randomCity}}\",\r\n                \"province\": \"{{$randomLocale}}\",\r\n                \"country\": \"{{$randomCountry}}\",\r\n                \"postalCode\": \"{{$randomDomainSuffix}}\",\r\n                \"geoLocation\" : \"{{$randomLongitude}}\"\r\n            }\r\n        ],\r\n        \"role\": \"ROLE_PROVIDER\"        \r\n    }\r\n}    ",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -862,15 +651,211 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8080/api/provider/update",
+							"raw": "localhost:8080/api/user/update",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
 								"api",
-								"provider",
+								"user",
 								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Providers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8080/api/user/provider",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"provider"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Provider by Id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Tests Provider by ID + gets data for Advance Search test\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.collectionVariables.set(\"city\", json.addresses[0].city);\r",
+									"    pm.collectionVariables.set(\"province\", json.addresses[0].province);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8080/api/user/provider/{{id}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"provider",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Advanced Search",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8080/api/user/provider?page=0&size=10&city={{city}}&province={{province}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"provider"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "lastName",
+									"value": "{lname}",
+									"disabled": true
+								},
+								{
+									"key": "city",
+									"value": "{{city}}"
+								},
+								{
+									"key": "province",
+									"value": "{{province}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const json = pm.response.json();\r",
+									"pm.test(\"Save response body variables to collections variables\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.collectionVariables.set(\"accesstokenprovider\", json.access_token);\r",
+									"    pm.collectionVariables.set(\"refreshtoken\", json.refresh_token);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "username",
+								"value": "marcusgeh",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "password",
+								"value": "0123xxx",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "{{username}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8080/api/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"auth",
+								"login"
 							]
 						}
 					},
@@ -922,6 +907,22 @@
 		},
 		{
 			"key": "newpassword",
+			"value": ""
+		},
+		{
+			"key": "usrername",
+			"value": ""
+		},
+		{
+			"key": "city",
+			"value": ""
+		},
+		{
+			"key": "province",
+			"value": ""
+		},
+		{
+			"key": "username",
 			"value": ""
 		}
 	]

@@ -48,7 +48,7 @@ public class UserController {
 	public void createNewUser(@Valid @RequestBody UserDto userDto, HttpServletRequest request, HttpServletResponse response) {
 		try {
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(HttpStatus.OK.value());
+            response.setStatus(HttpStatus.CREATED.value());
             new ObjectMapper().writeValue(response.getOutputStream(), userService.addNewUser(userDto, request.getRequestURI()));	
 		} catch (WalkMyDogException e) {
 			if(e.getExceptionReason().equals(WalkMyDogExReasons.DUPLICATE_RESOURCE)) {
