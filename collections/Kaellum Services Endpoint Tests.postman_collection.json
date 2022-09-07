@@ -677,7 +677,7 @@
 							}
 						],
 						"url": {
-							"raw": "localhost:8080/api/user/provider",
+							"raw": "localhost:8080/api/user/provider?page=0&size=100",
 							"host": [
 								"localhost"
 							],
@@ -686,6 +686,16 @@
 								"api",
 								"user",
 								"provider"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "100"
+								}
 							]
 						}
 					},
@@ -702,8 +712,8 @@
 									"\r",
 									"pm.test(\"Tests Provider by ID + gets data for Advance Search test\", function () {\r",
 									"    pm.response.to.have.status(200);\r",
-									"    pm.collectionVariables.set(\"city\", json.addresses[0].city);\r",
-									"    pm.collectionVariables.set(\"province\", json.addresses[0].province);\r",
+									"    pm.collectionVariables.set(\"city\", json.profile.addresses[0].city);\r",
+									"    pm.collectionVariables.set(\"province\", json.profile.addresses[0].province);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -720,7 +730,7 @@
 							}
 						],
 						"url": {
-							"raw": "localhost:8080/api/user/provider/{{id}}",
+							"raw": "localhost:8080/api/user/{{id}}",
 							"host": [
 								"localhost"
 							],
@@ -728,7 +738,6 @@
 							"path": [
 								"api",
 								"user",
-								"provider",
 								"{{id}}"
 							]
 						}

@@ -34,7 +34,6 @@ import com.kaellum.walkmydog.emailsender.EmailType;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
 import com.kaellum.walkmydog.user.collections.User;
-import com.kaellum.walkmydog.user.dto.ProviderDto;
 import com.kaellum.walkmydog.user.dto.ProviderUserIDDto;
 import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
@@ -422,7 +421,7 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	public ProviderDto getProviderById(String id) throws WalkMyDogException {
+	public UserDto getProviderById(String id) throws WalkMyDogException {
 		log.info("String Id {}", id);
 		if(id.equalsIgnoreCase(null) || id.isBlank())
 			throw WalkMyDogException.buildWarningNotFound(READ_API, String.format("User id not provided"));
@@ -431,7 +430,7 @@ public class UserServiceImpl implements UserService {
 			User user = userRepository.findById(id)
 					.orElseThrow(() -> WalkMyDogException.buildWarningNotFound(READ_API, String.format("User %s not found", id)));
 
-			return modelMapper.map(user.getProvider(), ProviderDto.class);
+			return modelMapper.map(user, UserDto.class);
 		} catch (WalkMyDogException e) {
 			log.error(e.getErrorMessage(), e);
 			throw e;

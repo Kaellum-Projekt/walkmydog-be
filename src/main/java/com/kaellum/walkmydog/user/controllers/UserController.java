@@ -28,7 +28,6 @@ import com.kaellum.walkmydog.exception.ConflictWalkMyDogException;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExReasons;
-import com.kaellum.walkmydog.user.dto.ProviderDto;
 import com.kaellum.walkmydog.user.dto.ProviderUserIDDto;
 import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
@@ -69,6 +68,13 @@ public class UserController {
 		return userService.updateUser(userDto);		
 	}
 	
+	@GetMapping("/{id}")
+	@ResponseStatus(HttpStatus.OK)
+	public UserDto getProviderById (@PathVariable String id) throws WalkMyDogException {
+		return userService.getProviderById(id);
+	}
+	
+	
 	@PutMapping("/update-password")
 	@ResponseStatus(HttpStatus.OK)
 	@PreAuthorize("@userResolverUser.isOwner(#userId)")
@@ -108,12 +114,6 @@ public class UserController {
 	}
 	
 	//**** PROVIDER ENDPOINTS ****//
-	@GetMapping("/provider/{id}")
-	@ResponseStatus(HttpStatus.OK)
-	public ProviderDto getProviderById (@PathVariable String id) throws WalkMyDogException {
-		return userService.getProviderById(id);
-	}
-	
 	@GetMapping("/provider")
 	@ResponseStatus(HttpStatus.OK)
 	public List<ProviderUserIDDto> advancedSearch (
