@@ -22,7 +22,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Provider{
 	
-	private ObjectId id = new ObjectId();
+	//private ObjectId id = new ObjectId();
 	private String firstName;
 	private String lastName;
 	private LocalDate dob;
