@@ -31,4 +31,5 @@ public interface UserService {
 			Optional<String> province,
 			Optional<String> city,
 			Pageable pageable) throws WalkMyDogException;
+	long getProvidersCount() throws WalkMyDogException;
 }

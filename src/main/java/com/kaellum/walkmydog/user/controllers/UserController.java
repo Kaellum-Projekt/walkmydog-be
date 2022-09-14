@@ -125,6 +125,12 @@ public class UserController {
 			@PageableDefault Pageable pageable ) throws WalkMyDogException {
 		return userService.advancedSearch(priceMin, priceMax, timeRange, province, city, pageable);
 	}
+	
+	@GetMapping("/provider/count")
+	@ResponseStatus(HttpStatus.OK)
+	public long providerCount () throws WalkMyDogException {
+		return userService.getProvidersCount();
+	}
 
 
 }

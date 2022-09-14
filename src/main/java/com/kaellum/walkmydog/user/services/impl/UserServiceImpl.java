@@ -19,6 +19,7 @@ import org.bson.Document;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -33,6 +34,7 @@ import com.kaellum.walkmydog.emailsender.EmailSenderEventPublisher;
 import com.kaellum.walkmydog.emailsender.EmailType;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
+import com.kaellum.walkmydog.user.collections.Provider;
 import com.kaellum.walkmydog.user.collections.User;
 import com.kaellum.walkmydog.user.dto.ProviderUserIDDto;
 import com.kaellum.walkmydog.user.dto.UserDto;
@@ -434,6 +436,20 @@ public class UserServiceImpl implements UserService {
 		} catch (WalkMyDogException e) {
 			log.error(e.getErrorMessage(), e);
 			throw e;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw WalkMyDogException.buildCriticalRuntime(READ_API, e);
+		}
+	}
+	
+	@Override
+	public long getProvidersCount() throws WalkMyDogException {
+		try {
+			Provider provider = new Provider();
+			provider.setRole("ROLE_PROVIDER");
+			User probe = new User();			
+			probe.setProvider(provider);
+			return userRepository.count(Example.of(probe));
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw WalkMyDogException.buildCriticalRuntime(READ_API, e);
