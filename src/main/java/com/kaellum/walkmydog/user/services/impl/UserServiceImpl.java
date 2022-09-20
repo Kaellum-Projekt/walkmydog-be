@@ -361,7 +361,7 @@ public class UserServiceImpl implements UserService {
 	 * 1 letters in Lower Case
 	 */
 	private boolean isPassStrong(String password){
-	    return password.matches("^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])(?=.*[a-z]).{6,}$");
+	    return password.matches("^(?=.*[A-Z])(?=.*[!@#$&*])(?=.*\\d)(?=.*[a-z]).{6,}$");
 
 	  }
 
