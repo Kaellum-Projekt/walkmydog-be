@@ -22,5 +22,6 @@ public class Address {
 	private String province;
 	private String country;
 	private String postalCode;
-	private Object geoLocation;
+	private String latitude;
+	private String longitude;
 }

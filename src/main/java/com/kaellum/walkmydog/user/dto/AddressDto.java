@@ -16,5 +16,6 @@ public class AddressDto{
 	private String province;
 	private String country;
 	private String postalCode;
-	private String geoLocation;
+	private String latitude;
+	private String longitude;
 }
