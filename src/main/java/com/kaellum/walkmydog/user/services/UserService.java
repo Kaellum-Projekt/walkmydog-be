@@ -8,7 +8,6 @@ import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 
 import com.kaellum.walkmydog.exception.WalkMyDogException;
-import com.kaellum.walkmydog.user.dto.ProviderUserIDDto;
 import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
 
@@ -24,12 +23,16 @@ public interface UserService {
 	Boolean passwordReset(UserPasswordUpdate userPasswordUpdate, String code) throws WalkMyDogException;
 	UserDto getUserByEmail(String email);
 	UserDto getProviderById (String id) throws WalkMyDogException;
-	List<ProviderUserIDDto> advancedSearch(
+	<T>List<T> advancedSearch(
 			Optional<Double> priceMin,
 			Optional<Double> priceMax,
 			Optional<List<Integer>> timeRange,
 			Optional<String> province,
 			Optional<String> city,
+			Optional<Double> minLat, 
+			Optional<Double> maxLat, 
+			Optional<Double> minLng, 
+			Optional<Double> maxLng, 
+			Optional<Boolean> isSimple,
 			Pageable pageable) throws WalkMyDogException;
-	long getProvidersCount() throws WalkMyDogException;
 }

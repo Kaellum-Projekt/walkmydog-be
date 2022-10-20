@@ -19,7 +19,6 @@ import org.bson.Document;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -34,9 +33,9 @@ import com.kaellum.walkmydog.emailsender.EmailSenderEventPublisher;
 import com.kaellum.walkmydog.emailsender.EmailType;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
-import com.kaellum.walkmydog.user.collections.Provider;
 import com.kaellum.walkmydog.user.collections.User;
-import com.kaellum.walkmydog.user.dto.ProviderUserIDDto;
+import com.kaellum.walkmydog.user.dto.ProviderUserFullDto;
+import com.kaellum.walkmydog.user.dto.ProviderUserSimpleDto;
 import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
 import com.kaellum.walkmydog.user.repositories.UserRepository;
@@ -371,21 +370,43 @@ public class UserServiceImpl implements UserService {
 	}
 
 	//**** PROVIDER ENDPOINTS ****//
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<ProviderUserIDDto> advancedSearch(Optional<Double> priceMin, Optional<Double> priceMax, Optional<List<Integer>> 
-	timeRange, Optional<String> province, Optional<String> city, Pageable pageable) throws WalkMyDogException {
+	public <T>List<T> advancedSearch(
+			Optional<Double> priceMin,
+			Optional<Double> priceMax,
+			Optional<List<Integer>> timeRange,
+			Optional<String> province,
+			Optional<String> city,
+			Optional<Double> minLat, 
+			Optional<Double> maxLat, 
+			Optional<Double> minLng, 
+			Optional<Double> maxLng, 
+			Optional<Boolean> isSimple,
+			Pageable pageable) throws WalkMyDogException {
 		
 		try {
 			List<User> users = null;
-			List<ProviderUserIDDto> dtosReturn = new ArrayList<>();
-			
-			final Query query = new Query().with(pageable);
+			boolean isSimp = false; 
 			final List<Criteria> criteria = new ArrayList<>();
 			
-			criteria.add(Criteria.where("provider.role").in("ROLE_PROVIDER"));
+			if(minLat.isPresent() || maxLat.isPresent() || minLng.isPresent() || maxLng.isPresent())
+				if (!(minLat.isPresent() && maxLat.isPresent() && minLng.isPresent() && maxLng.isPresent() && isSimple.isPresent())) {
+					throw WalkMyDogException.buildWarningNotFound(READ_API, String.format("All parameters of location coordinates & query flag should be provided"));
+				} else {
+					isSimp = isSimple.get();
+					criteria.add(Criteria.where("provider.addresses").elemMatch(Criteria.where("latitude").lte(maxLat.get())));
+					criteria.add(Criteria.where("provider.addresses").elemMatch(Criteria.where("latitude").gte(minLat.get())));
+					criteria.add(Criteria.where("provider.addresses").elemMatch(Criteria.where("longitude").lte(maxLng.get())));
+					criteria.add(Criteria.where("provider.addresses").elemMatch(Criteria.where("longitude").gte(minLng.get())));
+				}					
 			
-			if(city.isPresent())
-				criteria.add(Criteria.where("provider.addresses").elemMatch(Criteria.where("city").is(city.get())));				
+			final Query query = isSimp?new Query().with(Pageable.unpaged()):new Query().with(pageable);		
+			
+			criteria.add(Criteria.where("provider.role").in("ROLE_PROVIDER"));						
+
+			if(city.isPresent())	
+				criteria.add(Criteria.where("provider.addresses").elemMatch(Criteria.where("city").is(city.get())));		
 			
 			if(priceMin.isPresent())
 				criteria.add(Criteria.where("provider.price").gte(priceMin.get()));
@@ -404,14 +425,28 @@ public class UserServiceImpl implements UserService {
 			
 			users = mongoTemplate.find(query, User.class);	
 			
-			users.stream()
-			.forEach(x -> {
-				ProviderUserIDDto dto = modelMapper.map(x.getProvider(), ProviderUserIDDto.class);
-				dto.setId(x.getId());
-				dtosReturn.add(dto);
-			});
-			
-			return dtosReturn;
+			if(isSimp) {
+				List<ProviderUserSimpleDto> dtosReturn = new ArrayList<>();
+				users.stream()
+				.forEach(x -> {
+					ProviderUserSimpleDto dto = modelMapper.map(x.getProvider(), ProviderUserSimpleDto.class);
+					dto.setId(x.getId());
+					dtosReturn.add(dto);
+				});
+				
+				return (List<T>) dtosReturn;
+			}else {
+				List<ProviderUserFullDto> dtosReturn = new ArrayList<>();
+				users.stream()
+				.forEach(x -> {
+					ProviderUserFullDto dto = modelMapper.map(x.getProvider(), ProviderUserFullDto.class);
+					dto.setId(x.getId());
+					dtosReturn.add(dto);
+				});
+				
+				return (List<T>) dtosReturn;
+			}
+
 
 		} catch (WalkMyDogException e) {
 			log.error(e.getErrorMessage(), e);
@@ -436,20 +471,6 @@ public class UserServiceImpl implements UserService {
 		} catch (WalkMyDogException e) {
 			log.error(e.getErrorMessage(), e);
 			throw e;
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-			throw WalkMyDogException.buildCriticalRuntime(READ_API, e);
-		}
-	}
-	
-	@Override
-	public long getProvidersCount() throws WalkMyDogException {
-		try {
-			Provider provider = new Provider();
-			provider.setRole("ROLE_PROVIDER");
-			User probe = new User();			
-			probe.setProvider(provider);
-			return userRepository.count(Example.of(probe));
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			throw WalkMyDogException.buildCriticalRuntime(READ_API, e);

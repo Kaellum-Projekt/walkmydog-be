@@ -613,6 +613,10 @@
 									"    pm.collectionVariables.set(\"lastname\", json.lastName);\r",
 									"    pm.collectionVariables.set(\"email\", json.email);\r",
 									"    pm.collectionVariables.set(\"profileid\", json.profile.id);\r",
+									"    pm.collectionVariables.set(\"city\", json.profile.addresses[0].city);\r",
+									"    pm.collectionVariables.set(\"province\", json.profile.addresses[0].province);\r",
+									"    pm.collectionVariables.set(\"latitude\", json.profile.addresses[0].latitude);\r",
+									"    pm.collectionVariables.set(\"longitude\", json.profile.addresses[0].longitude);\r",
 									"});\r",
 									""
 								],
@@ -643,7 +647,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"id\": \"{{id}}\",\r\n    \"email\": \"{{username}}\",\r\n    \"profile\":  \r\n    {    \r\n        \"firstName\": \"{{firstname}}\" ,\r\n        \"lastName\": \"{{lastname}}\",\r\n        \"dob\" : \"2022-04-01\",\r\n        \"phone\": \"{{$randomPhoneNumber}}\",\r\n        \"price\" : \"{{$randomPrice}}\",\r\n        \"hours\" : [2],\r\n        \"days\" : [2,3],\r\n        \"addresses\" : [\r\n            {\r\n                \"street\": \"{{$randomStreetName}}\",\r\n                \"street2\": \"{{$randomStreetName}}\",\r\n                \"city\": \"{{$randomCity}}\",\r\n                \"province\": \"{{$randomLocale}}\",\r\n                \"country\": \"{{$randomCountry}}\",\r\n                \"postalCode\": \"{{$randomDomainSuffix}}\",\r\n                \"geoLocation\" : \"{{$randomLongitude}}\"\r\n            },\r\n            {\r\n                \"street\": \"{{$randomStreetName}}\",\r\n                \"street2\": \"{{$randomStreetName}}\",\r\n                \"city\": \"{{$randomCity}}\",\r\n                \"province\": \"{{$randomLocale}}\",\r\n                \"country\": \"{{$randomCountry}}\",\r\n                \"postalCode\": \"{{$randomDomainSuffix}}\",\r\n                \"geoLocation\" : \"{{$randomLongitude}}\"\r\n            }\r\n        ],\r\n        \"role\": \"ROLE_PROVIDER\"        \r\n    }\r\n}    ",
+							"raw": "{\r\n    \"id\": \"{{id}}\",\r\n    \"email\": \"{{username}}\",\r\n    \"profile\":  \r\n    {    \r\n        \"firstName\": \"{{firstname}}\" ,\r\n        \"lastName\": \"{{lastname}}\",\r\n        \"dob\" : \"2022-04-01\",\r\n        \"phone\": \"{{$randomPhoneNumber}}\",\r\n        \"price\" : \"{{$randomPrice}}\",\r\n        \"hours\" : [2],\r\n        \"days\" : [2,3],\r\n        \"addresses\" : [\r\n            {\r\n                \"street\": \"{{$randomStreetName}}\",\r\n                \"street2\": \"{{$randomStreetName}}\",\r\n                \"city\": \"{{$randomCity}}\",\r\n                \"province\": \"{{$randomLocale}}\",\r\n                \"country\": \"{{$randomCountry}}\",\r\n                \"postalCode\": \"{{$randomDomainSuffix}}\",\r\n                \"latitude\" : \"{{$randomLatitude}}\",\r\n                \"longitude\" : \"{{$randomLongitude}}\"\r\n            },\r\n            {\r\n                \"street\": \"{{$randomStreetName}}\",\r\n                \"street2\": \"{{$randomStreetName}}\",\r\n                \"city\": \"{{$randomCity}}\",\r\n                \"province\": \"{{$randomLocale}}\",\r\n                \"country\": \"{{$randomCountry}}\",\r\n                \"postalCode\": \"{{$randomDomainSuffix}}\",\r\n                \"latitude\" : \"{{$randomLatitude}}\",\r\n                \"longitude\" : \"{{$randomLongitude}}\"\r\n            }\r\n        ],\r\n        \"role\": \"ROLE_PROVIDER\"        \r\n    }\r\n}    ",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -673,11 +677,12 @@
 							{
 								"key": "Authorization",
 								"value": "Bearer {{access_token}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"url": {
-							"raw": "localhost:8080/api/user/provider?page=0&size=100",
+							"raw": "localhost:8080/api/user/provider",
 							"host": [
 								"localhost"
 							],
@@ -686,16 +691,6 @@
 								"api",
 								"user",
 								"provider"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "0"
-								},
-								{
-									"key": "size",
-									"value": "100"
-								}
 							]
 						}
 					},
@@ -714,6 +709,8 @@
 									"    pm.response.to.have.status(200);\r",
 									"    pm.collectionVariables.set(\"city\", json.profile.addresses[0].city);\r",
 									"    pm.collectionVariables.set(\"province\", json.profile.addresses[0].province);\r",
+									"    pm.collectionVariables.set(\"latitude\", json.profile.addresses[0].latitude);\r",
+									"    pm.collectionVariables.set(\"longitude\", json.profile.addresses[0].longitude);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -745,7 +742,7 @@
 					"response": []
 				},
 				{
-					"name": "Advanced Search",
+					"name": "Advanced Search (without coordinates)",
 					"event": [
 						{
 							"listen": "test",
@@ -799,6 +796,150 @@
 								{
 									"key": "province",
 									"value": "{{province}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Advanced Search (with coordinates & city & simple)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8080/api/user/provider?city={{city}}&page=0&size=10&minLat={{latitude}}&maxLat={{latitude}}&minLng={{longitude}}&maxLng={{longitude}}&isSimple=true",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"provider"
+							],
+							"query": [
+								{
+									"key": "city",
+									"value": "{{city}}"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "minLat",
+									"value": "{{latitude}}"
+								},
+								{
+									"key": "maxLat",
+									"value": "{{latitude}}"
+								},
+								{
+									"key": "minLng",
+									"value": "{{longitude}}"
+								},
+								{
+									"key": "maxLng",
+									"value": "{{longitude}}"
+								},
+								{
+									"key": "isSimple",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Advanced Search (with coordinates & city & full) Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "localhost:8080/api/user/provider?city={{city}}&page=0&size=10&minLat={{latitude}}&maxLat={{latitude}}&minLng={{longitude}}&maxLng={{longitude}}&isSimple=true",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"provider"
+							],
+							"query": [
+								{
+									"key": "city",
+									"value": "{{city}}"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "minLat",
+									"value": "{{latitude}}"
+								},
+								{
+									"key": "maxLat",
+									"value": "{{latitude}}"
+								},
+								{
+									"key": "minLng",
+									"value": "{{longitude}}"
+								},
+								{
+									"key": "maxLng",
+									"value": "{{longitude}}"
+								},
+								{
+									"key": "isSimple",
+									"value": "true"
 								}
 							]
 						}
@@ -932,6 +1073,14 @@
 		},
 		{
 			"key": "username",
+			"value": ""
+		},
+		{
+			"key": "latitude",
+			"value": ""
+		},
+		{
+			"key": "longitude",
 			"value": ""
 		}
 	]

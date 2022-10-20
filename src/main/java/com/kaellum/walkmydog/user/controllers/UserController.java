@@ -28,7 +28,7 @@ import com.kaellum.walkmydog.exception.ConflictWalkMyDogException;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExReasons;
-import com.kaellum.walkmydog.user.dto.ProviderUserIDDto;
+import com.kaellum.walkmydog.user.dto.ProviderUserFullDto;
 import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
 import com.kaellum.walkmydog.user.services.UserService;
@@ -116,21 +116,20 @@ public class UserController {
 	//**** PROVIDER ENDPOINTS ****//
 	@GetMapping("/provider")
 	@ResponseStatus(HttpStatus.OK)
-	public List<ProviderUserIDDto> advancedSearch (
+	public <T>List<T> advancedSearch (
 			@RequestParam Optional<Double> priceMin,
 			@RequestParam Optional<Double> priceMax,
 			@RequestParam Optional<List<Integer>> timeRange,
 			@RequestParam Optional<String> province,
 			@RequestParam Optional<String> city,
+			@RequestParam Optional<Double> minLat,
+			@RequestParam Optional<Double> maxLat,
+			@RequestParam Optional<Double> minLng,
+			@RequestParam Optional<Double> maxLng,
+			@RequestParam Optional<Boolean> isSimple,
 			@PageableDefault Pageable pageable ) throws WalkMyDogException {
-		return userService.advancedSearch(priceMin, priceMax, timeRange, province, city, pageable);
+		return userService.advancedSearch(
+				priceMin, priceMax, timeRange, province, city, minLat, maxLat, minLng, maxLng, isSimple, pageable);
 	}
 	
-	@GetMapping("/provider/count")
-	@ResponseStatus(HttpStatus.OK)
-	public long providerCount () throws WalkMyDogException {
-		return userService.getProvidersCount();
-	}
-
-
 }

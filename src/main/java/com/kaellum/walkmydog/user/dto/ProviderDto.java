@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 //@CustomObjectValidation(
 //        conditionalProperty = "role", values = {"ROLE_PROVIDER"},
 //        requiredProperties = {"phone", "price", "days", "hours", "geoLocation", "addresses"})
-public class ProviderDto {
+public class ProviderDto{
 	
 //	private String id;
 	@NotNull @NotEmpty
@@ -36,4 +36,5 @@ public class ProviderDto {
 	private Ratings ratings;
 	@NotNull @NotEmpty
 	private String role;
+	
 }
