@@ -29,8 +29,10 @@ dependencies {
 	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
 	implementation group: 'com.sun.mail', name: 'javax.mail', version: '1.6.2'
 
-	
-	
+	// Hazelcast
+    implementation group: 'com.hazelcast', name: 'hazelcast-spring', version: "5.1.1"
+    implementation group: 'com.hazelcast', name: 'hazelcast-sql', version: "5.1.1"
+    implementation group: 'com.hazelcast', name: 'hazelcast', version: "5.1.1"	
 	
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	compileOnly 'org.projectlombok:lombok'
@@ -43,8 +45,7 @@ dependencies {
 	implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.12.10'
 	
 	testCompileOnly 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
-	
+	testAnnotationProcessor 'org.projectlombok:lombok'	
 }
 
 configurations {

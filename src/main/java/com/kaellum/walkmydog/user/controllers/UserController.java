@@ -28,6 +28,8 @@ import com.kaellum.walkmydog.exception.ConflictWalkMyDogException;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExReasons;
+import com.kaellum.walkmydog.hazelcast.dto.AddressDto;
+import com.kaellum.walkmydog.hazelcast.service.AddressCache;
 import com.kaellum.walkmydog.user.dto.ProviderUserFullDto;
 import com.kaellum.walkmydog.user.dto.UserDto;
 import com.kaellum.walkmydog.user.dto.UserPasswordUpdate;
@@ -41,6 +43,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 	
 	private final UserService userService;
+	private final AddressCache addressCache;
 	
 	@PostMapping("/signup")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -130,6 +133,17 @@ public class UserController {
 			@PageableDefault Pageable pageable ) throws WalkMyDogException {
 		return userService.advancedSearch(
 				priceMin, priceMax, timeRange, province, city, minLat, maxLat, minLng, maxLng, isSimple, pageable);
+	}
+	
+	@GetMapping("/address")
+	@ResponseStatus(HttpStatus.OK)
+	public List<AddressDto> searchAddresses(
+			@RequestParam Optional<String> number,
+			@RequestParam Optional<String> street,
+			@RequestParam Optional<String> city,
+			@RequestParam Optional<String> province){
+		return addressCache.getAddressSearch(number, street, city, province);
+		
 	}
 	
 }

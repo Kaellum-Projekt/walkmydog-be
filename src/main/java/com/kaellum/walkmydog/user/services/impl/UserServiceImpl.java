@@ -33,6 +33,7 @@ import com.kaellum.walkmydog.emailsender.EmailSenderEventPublisher;
 import com.kaellum.walkmydog.emailsender.EmailType;
 import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
+import com.kaellum.walkmydog.user.collections.Provider;
 import com.kaellum.walkmydog.user.collections.User;
 import com.kaellum.walkmydog.user.dto.ProviderUserFullDto;
 import com.kaellum.walkmydog.user.dto.ProviderUserSimpleDto;
@@ -423,8 +424,8 @@ public class UserServiceImpl implements UserService {
 			if (!criteria.isEmpty())
 				query.addCriteria(new Criteria().andOperator(criteria.toArray(new Criteria[criteria.size()])));
 			
-			users = mongoTemplate.find(query, User.class);	
-			
+			users = mongoTemplate.find(query, User.class);
+					
 			if(isSimp) {
 				List<ProviderUserSimpleDto> dtosReturn = new ArrayList<>();
 				users.stream()

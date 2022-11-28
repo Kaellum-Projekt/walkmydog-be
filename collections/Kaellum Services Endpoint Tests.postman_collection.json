@@ -761,7 +761,8 @@
 							{
 								"key": "Authorization",
 								"value": "Bearer {{access_token}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"url": {
@@ -822,7 +823,8 @@
 							{
 								"key": "Authorization",
 								"value": "Bearer {{access_token}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"url": {
@@ -894,11 +896,12 @@
 							{
 								"key": "Authorization",
 								"value": "Bearer {{access_token}}",
-								"type": "text"
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"url": {
-							"raw": "localhost:8080/api/user/provider?city={{city}}&page=0&size=10&minLat={{latitude}}&maxLat={{latitude}}&minLng={{longitude}}&maxLng={{longitude}}&isSimple=true",
+							"raw": "localhost:8080/api/user/provider?city={{city}}&page=0&size=10&minLat={{latitude}}&maxLat={{latitude}}&minLng={{longitude}}&maxLng={{longitude}}&isSimple=false",
 							"host": [
 								"localhost"
 							],
@@ -939,7 +942,56 @@
 								},
 								{
 									"key": "isSimple",
-									"value": "true"
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Address Search",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"url": {
+							"raw": "localhost:8080/api/user/address?city=KIMBE&number=825",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"user",
+								"address"
+							],
+							"query": [
+								{
+									"key": "city",
+									"value": "KIMBE"
+								},
+								{
+									"key": "number",
+									"value": "825"
 								}
 							]
 						}
