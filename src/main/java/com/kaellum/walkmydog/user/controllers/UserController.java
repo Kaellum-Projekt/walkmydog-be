@@ -29,6 +29,7 @@ import com.kaellum.walkmydog.exception.WalkMyDogException;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExApiTypes;
 import com.kaellum.walkmydog.exception.enums.WalkMyDogExReasons;
 import com.kaellum.walkmydog.hazelcast.dto.AddressDto;
+import com.kaellum.walkmydog.hazelcast.dto.AddressFullDto;
 import com.kaellum.walkmydog.hazelcast.service.AddressCache;
 import com.kaellum.walkmydog.user.dto.ProviderUserFullDto;
 import com.kaellum.walkmydog.user.dto.UserDto;
@@ -137,12 +138,30 @@ public class UserController {
 	
 	@GetMapping("/address")
 	@ResponseStatus(HttpStatus.OK)
-	public List<AddressDto> searchAddresses(
+	public List<AddressFullDto> searchAddresses(
 			@RequestParam Optional<String> number,
 			@RequestParam Optional<String> street,
 			@RequestParam Optional<String> city,
 			@RequestParam Optional<String> province){
 		return addressCache.getAddressSearch(number, street, city, province);
+		
+	}
+	
+	@GetMapping("/asaddress")
+	@ResponseStatus(HttpStatus.OK)
+	public List<AddressFullDto> advancedSearchAddresses(
+			@RequestParam String param){
+		return addressCache.getAdvAddressSearch(param);
+		
+	}
+	
+	@GetMapping("/specaddress")
+	@ResponseStatus(HttpStatus.OK)
+	public List<String> getAddressByCategory(
+			@RequestParam Optional<String> street,
+			@RequestParam Optional<String> city,
+			@RequestParam Optional<String> province) throws Exception{
+		return addressCache.getAddressByCategory(street, city, province);
 		
 	}
 	

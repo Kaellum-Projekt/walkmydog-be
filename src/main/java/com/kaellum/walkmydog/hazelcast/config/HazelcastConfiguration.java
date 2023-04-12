@@ -35,6 +35,15 @@ public class HazelcastConfiguration {
                                 .setMaxSizePolicy(MaxSizePolicy.FREE_HEAP_SIZE)
                                 .setEvictionPolicy(EvictionPolicy.LRU)
                         )
+                )
+                .addMapConfig(new MapConfig()
+                        .setName("city_boundaries")
+                        .setTimeToLiveSeconds(3000)
+                        .setEvictionConfig(new EvictionConfig()
+                                .setSize(200)
+                                .setMaxSizePolicy(MaxSizePolicy.FREE_HEAP_SIZE)
+                                .setEvictionPolicy(EvictionPolicy.LRU)
+                        )
                 );
     }
     

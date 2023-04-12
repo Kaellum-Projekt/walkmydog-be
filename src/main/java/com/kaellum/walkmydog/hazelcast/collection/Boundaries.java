@@ -15,16 +15,15 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Addresses implements Serializable {
-    private static final long serialVersionUID = -3408701100386534973L;
+public class Boundaries implements Serializable {
+	private static final long serialVersionUID = -7202622706067606213L;
 	
 	@Id
 	private String id;
-	private Double lon;
-	private Double lat;
-	private String number;
-	private String street;
 	private String city;
+	private Double maxLon;
+	private Double minLon;
+	private Double MaxLat;
+	private Double MinLat;
 	private String province;
-
 }
